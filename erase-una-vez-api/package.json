@@ -1,0 +1,23 @@
+{
+  "name": "erase-una-vez-api",
+  "version": "1.0.0",
+  "description": "API REST del sistema web de la Compañía de Teatro Érase una Vez",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "node --watch src/server.js",
+    "start": "node src/server.js",
+    "crear-admin": "node scripts/crear-admin.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.23.1",
+    "qrcode": "^1.5.4"
+  }
+}

@@ -1,0 +1,101 @@
+# Pruebas de la API. Instala la extensión "REST Client" en VS Code y pulsa "Send Request"
+# sobre cada petición. Primero ejecuta el login y pega el token en la variable @token.
+
+@url = http://localhost:3000/api
+@token = PEGA_AQUI_EL_TOKEN_DEL_LOGIN
+
+### 1. Probar que la API y la base de datos funcionan
+GET {{url}}/salud
+
+### 2. Registrar un comprador
+POST {{url}}/auth/register
+Content-Type: application/json
+
+{
+  "nombres": "Ana",
+  "apellidos": "Quispe",
+  "ci": "1234567",
+  "correo": "ana@correo.com",
+  "telefono": "70000000",
+  "contrasena": "ClaveSegura123"
+}
+
+### 3. Iniciar sesión (copia el "token" de la respuesta)
+POST {{url}}/auth/login
+Content-Type: application/json
+
+{
+  "correo": "admin@teatro.com",
+  "contrasena": "AdminSeguro123"
+}
+
+### 4. Ver mis datos (requiere token)
+GET {{url}}/auth/me
+Authorization: Bearer {{token}}
+
+### 5. Listar usuarios (solo administrador)
+GET {{url}}/usuarios
+Authorization: Bearer {{token}}
+
+### 6. Crear una cuenta de recepción (solo administrador; se guarda también en personal_recepcion)
+POST {{url}}/usuarios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombres": "Luis",
+  "apellidos": "Mamani",
+  "correo": "recepcion@teatro.com",
+  "contrasena": "Recepcion123",
+  "rol": "RECEPCION"
+}
+
+### 7. Registrar una obra (solo administrador)
+POST {{url}}/obras
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "titulo": "Caperucita en la ciudad",
+  "descripcion": "Obra infantil con música en vivo",
+  "duracion_min": 60,
+  "publico_objetivo": "Niños y familias"
+}
+
+### 8. Ver las salas (solo administrador)
+GET {{url}}/salas
+Authorization: Bearer {{token}}
+
+### 9. Programar una presentación (solo administrador). Cambia la fecha por una futura
+POST {{url}}/presentaciones
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "id_obra": 1,
+  "id_sala": 1,
+  "fecha": "2026-12-05",
+  "hora_inicio": "19:00",
+  "precio": 30,
+  "cupo_gratuito": 10
+}
+
+### 10. Ver la cartelera (público, sin token)
+GET {{url}}/presentaciones
+
+### 11. Ver las obras (público)
+GET {{url}}/obras
+
+### 12. Crear una cuenta de docente (solo administrador; se guarda también en docente)
+POST {{url}}/usuarios
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "nombres": "Rosa",
+  "apellidos": "Flores",
+  "correo": "docente@teatro.com",
+  "contrasena": "Docente1234",
+  "rol": "DOCENTE",
+  "especialidad": "Actuación infantil"
+}
