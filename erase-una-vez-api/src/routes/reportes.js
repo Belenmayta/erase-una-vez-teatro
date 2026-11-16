@@ -4,7 +4,7 @@ const { verificarToken, requerirRol } = require('../middleware/auth');
 
 const router = express.Router();
 
-router.use(verificarToken, requerirRol('ADMINISTRADOR'));
+router.use(verificarToken, requerirRol('ADMINISTRADOR', 'DOCENTE'));
 
 // 1. Reporte de Ventas e Ingresos de Taquilla
 router.get('/ventas', async (req, res, next) => {
@@ -48,7 +48,6 @@ router.get('/ventas', async (req, res, next) => {
 
     const { rows: funciones } = await db.query(sql, params);
 
-    // Calcular totales acumulados
     let totalBoletosVendidos = 0;
     let totalEntradasGratuitas = 0;
     let totalIngresos = 0;
@@ -187,51 +186,117 @@ router.get('/mensualidades', async (req, res, next) => {
   }
 });
 
-// 4. Métricas consolidadas para el Dashboard Principal
+// 4. Informe Académico de Talleres: Asistencia, Crecimiento, Culminación y Certificados
+router.get('/talleres', async (req, res, next) => {
+  try {
+    const { id_curso } = req.query;
+    let sql = `
+      SELECT i.id_inscripcion, i.fecha_inscripcion, i.estado,
+             COALESCE(i.clases_asistidas, 0) AS clases_asistidas,
+             COALESCE(i.clases_totales, 16) AS clases_totales,
+             COALESCE(i.asistencia_porcentaje, 0) AS asistencia_porcentaje,
+             COALESCE(i.eval_expresion, 0) AS eval_expresion,
+             COALESCE(i.eval_voz, 0) AS eval_voz,
+             COALESCE(i.eval_improvisacion, 0) AS eval_improvisacion,
+             COALESCE(i.eval_compromiso, 0) AS eval_compromiso,
+             COALESCE(i.nota_final, 0) AS nota_final,
+             COALESCE(i.nivel_crecimiento, 'EN PROCESO') AS nivel_crecimiento,
+             i.observaciones_docente,
+             i.evaluado_por,
+             i.fecha_evaluacion,
+             COALESCE(i.culmino_taller, FALSE) AS culmino_taller,
+             COALESCE(i.certificado_otorgado, FALSE) AS certificado_otorgado,
+             i.codigo_certificado,
+             i.fecha_certificado,
+             e.id_estudiante, e.nombres AS estudiante_nombres, e.apellidos AS estudiante_apellidos,
+             e.ci AS estudiante_ci, e.telefono AS estudiante_telefono,
+             e.tutor_nombre, e.tutor_telefono,
+             COALESCE(NULLIF(e.correo, ''), u.correo) AS estudiante_correo,
+             c.id_curso, c.nombre AS curso_nombre, c.publico, c.mensualidad
+        FROM inscripcion i
+        JOIN estudiante e ON e.id_estudiante = i.id_estudiante
+        JOIN curso c ON c.id_curso = i.id_curso
+        LEFT JOIN usuario u ON u.id_usuario = e.id_usuario
+       WHERE 1=1`;
+
+    const params = [];
+    if (id_curso) {
+      params.push(id_curso);
+      sql += ` AND i.id_curso = $1`;
+    }
+
+    sql += ` ORDER BY c.nombre, e.apellidos, e.nombres`;
+
+    const { rows: participantes } = await db.query(sql, params);
+
+    const totalInscritos = participantes.length;
+    const totalCulminaron = participantes.filter((p) => p.culmino_taller).length;
+    const totalCertificados = participantes.filter((p) => p.certificado_otorgado).length;
+    const sumaAsist = participantes.reduce((s, p) => s + Number(p.asistencia_porcentaje || 0), 0);
+    const sumaNota = participantes.reduce((s, p) => s + Number(p.nota_final || 0), 0);
+
+    res.json({
+      resumen: {
+        total_inscritos: totalInscritos,
+        total_culminaron: totalCulminaron,
+        total_certificados: totalCertificados,
+        promedio_asistencia: totalInscritos > 0 ? Number((sumaAsist / totalInscritos).toFixed(1)) : 0,
+        promedio_nota: totalInscritos > 0 ? Number((sumaNota / totalInscritos).toFixed(1)) : 0,
+      },
+      participantes,
+    });
+  } catch (e) {
+    next(e);
+  }
+});
+
+// 5. Métricas consolidadas para el Dashboard Principal
 router.get('/dashboard', async (req, res, next) => {
   try {
-    // 1. Obras activas
-    const { rows: oRows } = await db.query(`SELECT COUNT(*) FROM obra WHERE estado = 'ACTIVA'`);
-
-    // 2. Próximas presentaciones
-    const { rows: fRows } = await db.query(
-      `SELECT COUNT(*) FROM presentacion
-        WHERE estado = 'PROGRAMADA' AND fecha >= CURRENT_DATE`
+    const { rows: oRows } = await db.query(
+      `SELECT COUNT(*) FILTER (WHERE COALESCE(estado, 'ACTIVA') NOT IN ('INACTIVA', 'Finalizada')) AS activas,
+              COUNT(*) FILTER (WHERE estado = 'Finalizada') AS historicas,
+              COUNT(*) AS total
+         FROM obra`
     );
 
-    // 3. Ventas e ingresos del mes actual
+    const { rows: fRows } = await db.query(
+      `SELECT COUNT(*) FROM presentacion WHERE estado = 'PROGRAMADA'`
+    );
+
     const { rows: vMes } = await db.query(
       `SELECT COUNT(b.id_boleto) FILTER (WHERE b.tipo = 'PAGADO') AS boletos_mes,
               COALESCE(SUM(b.precio) FILTER (WHERE b.tipo = 'PAGADO'), 0) AS ingresos_mes
          FROM boleto b
          JOIN venta v ON v.id_venta = b.id_venta
-        WHERE b.estado IN ('EMITIDO', 'USADO')
-          AND EXTRACT(MONTH FROM v.fecha_venta) = EXTRACT(MONTH FROM CURRENT_DATE)
-          AND EXTRACT(YEAR FROM v.fecha_venta) = EXTRACT(YEAR FROM CURRENT_DATE)`
+        WHERE b.estado IN ('EMITIDO', 'USADO')`
     );
 
-    // 4. Cursos activos y estudiantes
     const { rows: cRows } = await db.query(`SELECT COUNT(*) FROM curso WHERE estado = 'ACTIVO'`);
     const { rows: eRows } = await db.query(
-      `SELECT COUNT(DISTINCT id_estudiante) FROM inscripcion WHERE estado = 'ACTIVA'`
+      `SELECT COUNT(DISTINCT id_estudiante) AS activos,
+              COUNT(*) FILTER (WHERE culmino_taller = TRUE) AS culminados,
+              COUNT(*) FILTER (WHERE certificado_otorgado = TRUE) AS certificados
+         FROM inscripcion`
     );
 
-    // 5. Mensualidades del mes actual
     const { rows: mMes } = await db.query(
       `SELECT COALESCE(SUM(monto) FILTER (WHERE estado = 'PAGADA'), 0) AS cobrado_mes,
               COALESCE(SUM(monto) FILTER (WHERE estado = 'PENDIENTE'), 0) AS pendiente_mes
-         FROM pago_mensualidad
-        WHERE mes = EXTRACT(MONTH FROM CURRENT_DATE)
-          AND anio = EXTRACT(YEAR FROM CURRENT_DATE)`
+         FROM pago_mensualidad`
     );
 
     res.json({
-      obras_activas: parseInt(oRows[0].count, 10) || 0,
+      obras_activas: parseInt(oRows[0].activas, 10) || 0,
+      obras_historicas: parseInt(oRows[0].historicas, 10) || 0,
+      obras_totales: parseInt(oRows[0].total, 10) || 0,
       proximas_funciones: parseInt(fRows[0].count, 10) || 0,
       boletos_vendidos_mes: parseInt(vMes[0].boletos_mes, 10) || 0,
       ingresos_taquilla_mes: parseFloat(vMes[0].ingresos_mes) || 0,
       cursos_activos: parseInt(cRows[0].count, 10) || 0,
-      estudiantes_activos: parseInt(eRows[0].count, 10) || 0,
+      estudiantes_activos: parseInt(eRows[0].activos, 10) || 0,
+      talleres_culminados: parseInt(eRows[0].culminados, 10) || 0,
+      certificados_emitidos: parseInt(eRows[0].certificados, 10) || 0,
       mensualidades_cobradas_mes: parseFloat(mMes[0].cobrado_mes) || 0,
       mensualidades_pendientes_mes: parseFloat(mMes[0].pendiente_mes) || 0,
     });

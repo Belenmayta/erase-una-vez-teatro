@@ -67,6 +67,7 @@ export function AuthProvider({ children }) {
   };
 
   const esAdmin = usuario?.rol === 'ADMINISTRADOR';
+  const esDocente = usuario?.rol === 'DOCENTE';
   const esRecepcion = usuario?.rol === 'RECEPCION';
   const esComprador = usuario?.rol === 'COMPRADOR';
 
@@ -80,6 +81,7 @@ export function AuthProvider({ children }) {
         logout,
         loginDemo,
         esAdmin,
+        esDocente,
         esRecepcion,
         esComprador,
       }}

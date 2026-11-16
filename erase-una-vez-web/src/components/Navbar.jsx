@@ -15,7 +15,7 @@ import {
 } from 'lucide-react';
 
 export default function Navbar({ alAbrirLogin, paginaActual, alCambiarPagina }) {
-  const { usuario, logout, esAdmin, esRecepcion, esComprador } = useAuth();
+  const { usuario, logout, esAdmin, esDocente, esRecepcion, esComprador } = useAuth();
   const [menuMovil, setMenuMovil] = useState(false);
 
   const irA = (pagina) => {
@@ -98,7 +98,7 @@ export default function Navbar({ alAbrirLogin, paginaActual, alCambiarPagina }) 
               </button>
             )}
 
-            {esAdmin && (
+            {(esAdmin || esDocente) && (
               <button
                 onClick={() => irA('mis-estudiantes')}
                 className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${
@@ -220,7 +220,7 @@ export default function Navbar({ alAbrirLogin, paginaActual, alCambiarPagina }) 
             </button>
           )}
 
-          {esAdmin && (
+          {(esAdmin || esDocente) && (
             <button
               onClick={() => irA('mis-estudiantes')}
               className="w-full text-left py-2.5 px-3 rounded-lg text-slate-200 hover:bg-slate-800 flex items-center gap-2"

@@ -150,12 +150,23 @@ obtenerAsientosFuncion: (idOObjeto) => {
     const params = new URLSearchParams(filtros).toString();
     return request(`/inscripciones${params ? `?${params}` : ''}`);
   },
+  actualizarSeguimientoInscripcion: (id, datos) =>
+    request(`/inscripciones/${id}/seguimiento`, { method: 'PUT', body: datos }),
+  registrarAsistenciaRapida: (id, delta = 1) =>
+    request(`/inscripciones/${id}/asistencia-rapida`, { method: 'POST', body: { delta } }),
+  cambiarEstadoInscripcion: (id, estado) =>
+    request(`/inscripciones/${id}/estado`, { method: 'PATCH', body: { estado } }),
 
   obtenerMensualidades: (filtros = {}) => {
     const params = new URLSearchParams(filtros).toString();
     return request(`/mensualidades${params ? `?${params}` : ''}`);
   },
-  cobrarMensualidad: (id) => request(`/mensualidades/${id}/cobrar`, { method: 'POST' }),
+  cobrarMensualidad: (id, datos = {}) =>
+    request(`/mensualidades/${id}/cobrar`, { method: 'POST', body: datos }),
+  enviarRecordatorioCorreo: (id) =>
+    request(`/mensualidades/${id}/recordatorio-correo`, { method: 'POST' }),
+  enviarRecordatorioMasivo: () =>
+    request('/mensualidades/recordatorio-masivo', { method: 'POST' }),
   generarPeriodoMensualidades: (mes, anio, id_curso) =>
     request('/mensualidades/generar-periodo', { method: 'POST', body: { mes, anio, id_curso } }),
 
@@ -177,5 +188,9 @@ obtenerAsientosFuncion: (idOObjeto) => {
   reporteMensualidades: (filtros = {}) => {
     const params = new URLSearchParams(filtros).toString();
     return request(`/reportes/mensualidades${params ? `?${params}` : ''}`);
+  },
+  reporteTalleres: (filtros = {}) => {
+    const params = new URLSearchParams(filtros).toString();
+    return request(`/reportes/talleres${params ? `?${params}` : ''}`);
   },
 };

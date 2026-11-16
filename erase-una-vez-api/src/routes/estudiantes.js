@@ -6,20 +6,27 @@ const router = express.Router();
 
 router.use(verificarToken);
 
+function esAdminODocente(rol) {
+  return rol === 'ADMINISTRADOR' || rol === 'DOCENTE';
+}
+
 // 1. Listar estudiantes
 router.get('/', async (req, res, next) => {
   try {
     let sql = `
       SELECT e.id_estudiante, e.id_usuario, e.nombres, e.apellidos, e.ci, e.fecha_nacimiento,
              e.telefono, e.tutor_nombre, e.tutor_telefono,
+             COALESCE(NULLIF(e.correo, ''), u.correo) AS correo,
              u.correo AS usuario_correo,
-             COUNT(i.id_inscripcion) FILTER (WHERE i.estado = 'ACTIVA') AS inscripciones_activas
+             COUNT(i.id_inscripcion) FILTER (WHERE i.estado = 'ACTIVA') AS inscripciones_activas,
+             COUNT(i.id_inscripcion) FILTER (WHERE i.culmino_taller = TRUE) AS talleres_culminados,
+             COUNT(i.id_inscripcion) FILTER (WHERE i.certificado_otorgado = TRUE) AS certificados_obtenidos
         FROM estudiante e
         LEFT JOIN usuario u ON u.id_usuario = e.id_usuario
         LEFT JOIN inscripcion i ON i.id_estudiante = e.id_estudiante`;
 
     const params = [];
-    if (req.usuario.rol !== 'ADMINISTRADOR') {
+    if (!esAdminODocente(req.usuario.rol)) {
       params.push(req.usuario.id);
       sql += ` WHERE e.id_usuario = $1`;
     }
@@ -38,7 +45,8 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   try {
     const { rows: eRows } = await db.query(
-      `SELECT e.*, u.correo AS usuario_correo, u.nombres AS usuario_nombres, u.apellidos AS usuario_apellidos
+      `SELECT e.*, COALESCE(NULLIF(e.correo, ''), u.correo) AS correo,
+              u.correo AS usuario_correo, u.nombres AS usuario_nombres, u.apellidos AS usuario_apellidos
          FROM estudiante e
          LEFT JOIN usuario u ON u.id_usuario = e.id_usuario
         WHERE e.id_estudiante = $1`,
@@ -48,14 +56,12 @@ router.get('/:id', async (req, res, next) => {
     if (!eRows[0]) return res.status(404).json({ error: 'Estudiante no encontrado' });
     const est = eRows[0];
 
-    // Verificar permisos
-    if (req.usuario.rol !== 'ADMINISTRADOR' && est.id_usuario !== req.usuario.id) {
+    if (!esAdminODocente(req.usuario.rol) && est.id_usuario !== req.usuario.id) {
       return res.status(403).json({ error: 'No tiene permiso para ver este estudiante' });
     }
 
-    // Cursos en los que está inscrito
     const { rows: cursos } = await db.query(
-      `SELECT i.id_inscripcion, i.fecha_inscripcion, i.estado AS estado_inscripcion,
+      `SELECT i.*,
               c.id_curso, c.nombre AS curso_nombre, c.mensualidad, c.publico, c.estado AS estado_curso
          FROM inscripcion i
          JOIN curso c ON c.id_curso = i.id_curso
@@ -72,18 +78,29 @@ router.get('/:id', async (req, res, next) => {
 
 // 3. Registrar estudiante (para inscripción a taller o desde administración)
 router.post('/', async (req, res, next) => {
-  const { nombres, apellidos, ci, fecha_nacimiento, telefono, tutor_nombre, tutor_telefono, id_usuario } = req.body;
+  const {
+    nombres,
+    apellidos,
+    ci,
+    fecha_nacimiento,
+    telefono,
+    correo,
+    tutor_nombre,
+    tutor_telefono,
+    id_usuario,
+  } = req.body;
 
   if (!nombres || !apellidos) {
     return res.status(400).json({ error: 'Complete al menos los nombres y apellidos del estudiante' });
   }
 
   try {
-    const usuarioAsociado = req.usuario.rol === 'ADMINISTRADOR' && id_usuario ? id_usuario : req.usuario.id;
+    const usuarioAsociado =
+      esAdminODocente(req.usuario.rol) && id_usuario ? id_usuario : req.usuario.id;
 
     const { rows } = await db.query(
-      `INSERT INTO estudiante (id_usuario, nombres, apellidos, ci, fecha_nacimiento, telefono, tutor_nombre, tutor_telefono)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO estudiante (id_usuario, nombres, apellidos, ci, fecha_nacimiento, telefono, correo, tutor_nombre, tutor_telefono)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
        RETURNING *`,
       [
         usuarioAsociado,
@@ -92,6 +109,7 @@ router.post('/', async (req, res, next) => {
         ci || null,
         fecha_nacimiento || null,
         telefono || null,
+        correo ? correo.trim() : null,
         tutor_nombre || null,
         tutor_telefono || null,
       ]
@@ -103,28 +121,26 @@ router.post('/', async (req, res, next) => {
   }
 });
 
-// 4. Modificar estudiante (Solo Administrador)
-router.put('/:id', requerirRol('ADMINISTRADOR'), async (req, res, next) => {
-  const { nombres, apellidos, ci, fecha_nacimiento, telefono, tutor_nombre, tutor_telefono } = req.body;
+// 4. Modificar estudiante (Administrador o Docente)
+router.put('/:id', requerirRol('ADMINISTRADOR', 'DOCENTE'), async (req, res, next) => {
+  const { nombres, apellidos, ci, fecha_nacimiento, telefono, correo, tutor_nombre, tutor_telefono } =
+    req.body;
 
   if (!nombres || !apellidos) {
     return res.status(400).json({ error: 'Complete nombres y apellidos' });
   }
 
   try {
-    // Comprobar si existe y permisos
-    const { rows: actual } = await db.query('SELECT * FROM estudiante WHERE id_estudiante = $1', [req.params.id]);
+    const { rows: actual } = await db.query('SELECT * FROM estudiante WHERE id_estudiante = $1', [
+      req.params.id,
+    ]);
     if (!actual[0]) return res.status(404).json({ error: 'Estudiante no encontrado' });
-
-    if (req.usuario.rol !== 'ADMINISTRADOR' && actual[0].id_usuario !== req.usuario.id) {
-      return res.status(403).json({ error: 'No tiene permiso para modificar este estudiante' });
-    }
 
     const { rows } = await db.query(
       `UPDATE estudiante
           SET nombres = $1, apellidos = $2, ci = $3, fecha_nacimiento = $4,
-              telefono = $5, tutor_nombre = $6, tutor_telefono = $7
-        WHERE id_estudiante = $8
+              telefono = $5, correo = $6, tutor_nombre = $7, tutor_telefono = $8
+        WHERE id_estudiante = $9
         RETURNING *`,
       [
         nombres.trim(),
@@ -132,6 +148,7 @@ router.put('/:id', requerirRol('ADMINISTRADOR'), async (req, res, next) => {
         ci || null,
         fecha_nacimiento || null,
         telefono || null,
+        correo ? correo.trim() : null,
         tutor_nombre || null,
         tutor_telefono || null,
         req.params.id,
