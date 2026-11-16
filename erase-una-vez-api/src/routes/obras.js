@@ -4,15 +4,20 @@ const { verificarToken, requerirRol } = require('../middleware/auth');
 
 const router = express.Router();
 
-// Consultar todas las obras (en cartelera, próximamente y archivo histórico de obras antiguas)
+// Consultar todas las obras (en cartelera, próximamente y archivo histórico) incluyendo su teatro/sala
 router.get('/', async (req, res, next) => {
   try {
     const { rows } = await db.query(
       `SELECT o.id_obra, o.titulo, o.descripcion, o.duracion_min, o.publico_objetivo, o.afiche_url, o.estado,
+              o.id_sala,
+              COALESCE(s.nombre, 'Cine Teatro 6 de Agosto') AS sala_nombre,
+              COALESCE(s.capacidad, 392) AS sala_capacidad,
+              s.plano AS sala_plano,
               COUNT(p.id_presentacion) FILTER (WHERE p.estado = 'PROGRAMADA') AS funciones_programadas
          FROM obra o
+         LEFT JOIN sala s ON s.id_sala = o.id_sala
          LEFT JOIN presentacion p ON p.id_obra = o.id_obra
-        GROUP BY o.id_obra
+        GROUP BY o.id_obra, s.id_sala, s.nombre, s.capacidad, s.plano
         ORDER BY
           CASE
             WHEN o.estado IN ('ACTIVA', 'En cartelera') THEN 1
@@ -30,8 +35,11 @@ router.get('/', async (req, res, next) => {
 router.get('/:id', async (req, res, next) => {
   try {
     const { rows } = await db.query(
-      `SELECT id_obra, titulo, descripcion, duracion_min, publico_objetivo, afiche_url, estado
-         FROM obra WHERE id_obra = $1`,
+      `SELECT o.id_obra, o.titulo, o.descripcion, o.duracion_min, o.publico_objetivo, o.afiche_url, o.estado,
+              o.id_sala, s.nombre AS sala_nombre, s.capacidad AS sala_capacidad, s.plano AS sala_plano
+         FROM obra o
+         LEFT JOIN sala s ON s.id_sala = o.id_sala
+        WHERE o.id_obra = $1`,
       [req.params.id]
     );
     if (!rows[0]) return res.status(404).json({ error: 'Obra no encontrada' });
@@ -41,14 +49,16 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// Registrar obra (administrador)
+// Registrar obra (administrador) con opción de elegir Teatro/Sala de la base de datos
 router.post('/', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res, next) => {
   try {
-    const { titulo, descripcion, duracion_min, publico_objetivo, afiche_url, estado } = req.body;
+    const { titulo, descripcion, duracion_min, publico_objetivo, afiche_url, estado, id_sala } =
+      req.body;
     if (!titulo) return res.status(400).json({ error: 'El título es obligatorio' });
+
     const { rows } = await db.query(
-      `INSERT INTO obra (titulo, descripcion, duracion_min, publico_objetivo, afiche_url, estado)
-       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      `INSERT INTO obra (titulo, descripcion, duracion_min, publico_objetivo, afiche_url, estado, id_sala)
+       VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
       [
         titulo,
         descripcion || null,
@@ -56,6 +66,7 @@ router.post('/', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res, 
         publico_objetivo || null,
         afiche_url || null,
         estado || 'En cartelera',
+        id_sala ? Number(id_sala) : 2,
       ]
     );
     res.status(201).json(rows[0]);
@@ -65,16 +76,23 @@ router.post('/', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res, 
   }
 });
 
-// Modificar obra (administrador)
+// Modificar obra (administrador) incluyendo cambio de Teatro/Sala y Estado
 router.put('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res, next) => {
   try {
-    const { titulo, descripcion, duracion_min, publico_objetivo, afiche_url, estado } = req.body;
+    const { titulo, descripcion, duracion_min, publico_objetivo, afiche_url, estado, id_sala } =
+      req.body;
     if (!titulo) return res.status(400).json({ error: 'El título es obligatorio' });
     const { rows } = await db.query(
-      `UPDATE obra SET titulo = $1, descripcion = $2, duracion_min = $3,
-                       publico_objetivo = $4, afiche_url = $5,
-                       estado = COALESCE($6, estado)
-        WHERE id_obra = $7 RETURNING *`,
+      `UPDATE obra
+          SET titulo = $1,
+              descripcion = $2,
+              duracion_min = $3,
+              publico_objetivo = $4,
+              afiche_url = $5,
+              estado = COALESCE($6, estado),
+              id_sala = COALESCE($7, id_sala)
+        WHERE id_obra = $8
+        RETURNING *`,
       [
         titulo,
         descripcion || null,
@@ -82,6 +100,7 @@ router.put('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res
         publico_objetivo || null,
         afiche_url || null,
         estado || null,
+        id_sala ? Number(id_sala) : null,
         req.params.id,
       ]
     );
@@ -93,7 +112,7 @@ router.put('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res
   }
 });
 
-// Cambiar estado de obra o dar de baja
+// Cambiar estado de obra a Finalizada
 router.delete('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res, next) => {
   try {
     const { rows } = await db.query(

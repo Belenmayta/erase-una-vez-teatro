@@ -50,6 +50,12 @@ export default function AdminDashboard({ alAbrirLogin }) {
   const [duracionObra, setDuracionObra] = useState(60);
   const [publicoObra, setPublicoObra] = useState('Familiar');
   const [aficheObra, setAficheObra] = useState('');
+  const [idSalaObra, setIdSalaObra] = useState(2);
+  const [estadoObraNueva, setEstadoObraNueva] = useState('En cartelera');
+  const [programarAlCrear, setProgramarAlCrear] = useState(false);
+  const [fechaObraInicial, setFechaObraInicial] = useState('');
+  const [horaObraInicial, setHoraObraInicial] = useState('19:30');
+  const [precioObraInicial, setPrecioObraInicial] = useState(40);
 
   // Form Función
   const [idObraFuncion, setIdObraFuncion] = useState('');
@@ -154,7 +160,10 @@ export default function AdminDashboard({ alAbrirLogin }) {
       setRepTalleres(rTalleres);
 
       if (listaObras.length > 0 && !idObraFuncion) setIdObraFuncion(listaObras[0].id_obra);
-      if (listaSalas.length > 0) setIdSalaFuncion(listaSalas[0].id_sala);
+      if (listaSalas.length > 0) {
+        setIdSalaFuncion(listaSalas[0].id_sala);
+        setIdSalaObra(listaSalas[0].id_sala);
+      }
       if (listaFuncs.length > 0 && !idFuncSocial) {
         setIdFuncSocial(listaFuncs[0].id_presentacion || listaFuncs[0].id_funcion);
       }
@@ -185,17 +194,34 @@ export default function AdminDashboard({ alAbrirLogin }) {
   const guardarObra = async (e) => {
     e.preventDefault();
     try {
-      await api.crearObra({
+      const nuevaObra = await api.crearObra({
         titulo: tituloObra,
         descripcion: descObra,
         duracion_min: duracionObra,
         publico_objetivo: publicoObra,
         afiche_url: aficheObra || null,
+        id_sala: Number(idSalaObra),
+        estado: estadoObraNueva,
       });
+
+      if (programarAlCrear && fechaObraInicial && nuevaObra?.id_obra) {
+        await api.crearFuncion({
+          id_obra: nuevaObra.id_obra,
+          id_sala: Number(idSalaObra),
+          fecha: fechaObraInicial,
+          hora_inicio: horaObraInicial,
+          precio: Number(precioObraInicial),
+          cupo_gratuito: 10,
+        });
+      }
+
       setModalObra(false);
       setTituloObra('');
       setDescObra('');
-      mostrarNotif('exito', 'Obra creada exitosamente');
+      setAficheObra('');
+      setProgramarAlCrear(false);
+      setFechaObraInicial('');
+      mostrarNotif('exito', 'Obra creada y asignada al teatro exitosamente');
       cargarDatos();
     } catch (err) {
       mostrarNotif('error', err.message);
@@ -449,9 +475,28 @@ export default function AdminDashboard({ alAbrirLogin }) {
         duracion_min: obra.duracion_min,
         publico_objetivo: obra.publico_objetivo,
         afiche_url: obra.afiche_url,
+        id_sala: obra.id_sala,
         estado: nuevoEstado,
       });
       mostrarNotif('exito', `Estado de "${obra.titulo}" actualizado a ${nuevoEstado}`);
+      cargarDatos();
+    } catch (err) {
+      mostrarNotif('error', err.message);
+    }
+  };
+
+  const cambiarSalaObra = async (obra, nuevaSalaId) => {
+    try {
+      await api.editarObra(obra.id_obra, {
+        titulo: obra.titulo,
+        descripcion: obra.descripcion,
+        duracion_min: obra.duracion_min,
+        publico_objetivo: obra.publico_objetivo,
+        afiche_url: obra.afiche_url,
+        id_sala: Number(nuevaSalaId),
+        estado: obra.estado,
+      });
+      mostrarNotif('exito', `Teatro asignado a "${obra.titulo}" actualizado con éxito`);
       cargarDatos();
     } catch (err) {
       mostrarNotif('error', err.message);
@@ -706,14 +751,14 @@ export default function AdminDashboard({ alAbrirLogin }) {
                 Obras en Repertorio y Archivo Histórico ({obras.length})
               </h3>
               <span className="text-xs text-slate-400">
-                Todas las obras antiguas son visibles para alumnos y administrativos en Cartelera
+                Puedes escoger o cambiar el Teatro/Sala y el estado de cada obra desde aquí
               </span>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {obras.map((o) => (
                 <div
                   key={o.id_obra}
-                  className="p-4 bg-slate-950 rounded-2xl border border-slate-800 flex gap-4 items-center justify-between"
+                  className="p-4 bg-slate-950 rounded-2xl border border-slate-800 flex flex-col sm:flex-row gap-4 sm:items-center justify-between"
                 >
                   <div className="flex gap-4 items-center flex-1">
                     <img
@@ -726,10 +771,25 @@ export default function AdminDashboard({ alAbrirLogin }) {
                       <span className="text-[10px] text-teatro-300 font-semibold block">
                         {o.publico_objetivo} • {o.duracion_min} min
                       </span>
+                      <span className="text-[11px] text-oro-400 font-semibold block">
+                        🎭 {o.sala_nombre || 'Cine Teatro 6 de Agosto'} (Cap. {o.sala_capacidad || 392})
+                      </span>
                       <p className="text-xs text-slate-400 line-clamp-2">{o.descripcion}</p>
                     </div>
                   </div>
-                  <div className="shrink-0">
+                  <div className="shrink-0 flex flex-col gap-1.5">
+                    <select
+                      value={o.id_sala || 2}
+                      onChange={(e) => cambiarSalaObra(o, e.target.value)}
+                      className="px-2.5 py-1.5 bg-slate-900 border border-slate-700 rounded-xl text-[11px] font-semibold text-white"
+                      title="Cambiar Teatro / Sala"
+                    >
+                      {salas.map((s) => (
+                        <option key={s.id_sala} value={s.id_sala}>
+                          🎭 {s.nombre} ({s.capacidad})
+                        </option>
+                      ))}
+                    </select>
                     <select
                       value={o.estado || 'En cartelera'}
                       onChange={(e) => cambiarEstadoObra(o, e.target.value)}
@@ -1392,10 +1452,10 @@ export default function AdminDashboard({ alAbrirLogin }) {
         </div>
       )}
 
-      {/* MODAL CREAR OBRA */}
+      {/* MODAL CREAR OBRA (CON SELECTOR DE TEATRO/SALA DE LA BASE DE DATOS) */}
       {modalObra && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in">
-          <div className="relative w-full max-w-md bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div className="relative w-full max-w-lg bg-slate-900 border border-slate-700 rounded-3xl p-6 shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
             <h3 className="text-xl font-bold font-theater text-white">Nueva Obra Teatral</h3>
             <form onSubmit={guardarObra} className="space-y-3">
               <div>
@@ -1409,6 +1469,34 @@ export default function AdminDashboard({ alAbrirLogin }) {
                   placeholder="Ej. El Principito y las Estrellas"
                 />
               </div>
+
+              {/* Selector de Teatro / Sala según la Base de Datos */}
+              <div className="p-3.5 bg-slate-950 border border-oro-500/40 rounded-2xl space-y-2">
+                <label className="block text-xs font-bold text-oro-400">
+                  🎭 Escoger Teatro / Sala de Presentación (según Base de Datos) *
+                </label>
+                <select
+                  value={idSalaObra}
+                  onChange={(e) => setIdSalaObra(Number(e.target.value))}
+                  className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs font-semibold focus:outline-none focus:border-oro-400"
+                >
+                  {salas.map((s) => (
+                    <option key={s.id_sala} value={s.id_sala}>
+                      {s.nombre} — Capacidad: {s.capacidad} butacas
+                    </option>
+                  ))}
+                </select>
+                {(() => {
+                  const salaSel = salas.find((s) => Number(s.id_sala) === Number(idSalaObra));
+                  return salaSel ? (
+                    <p className="text-[11px] text-slate-400">
+                      📍 <strong className="text-slate-200">{salaSel.direccion}</strong>
+                      {salaSel.plano ? ` • ${salaSel.plano}` : ''}
+                    </p>
+                  ) : null;
+                })()}
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">Descripción / Sinopsis</label>
                 <textarea
@@ -1419,7 +1507,8 @@ export default function AdminDashboard({ alAbrirLogin }) {
                   placeholder="Sinopsis de la obra..."
                 />
               </div>
-              <div className="grid grid-cols-2 gap-3">
+
+              <div className="grid grid-cols-3 gap-3">
                 <div>
                   <label className="block text-xs font-semibold text-slate-300 mb-1">Duración (min)</label>
                   <input
@@ -1439,7 +1528,20 @@ export default function AdminDashboard({ alAbrirLogin }) {
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
                   />
                 </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">Estado</label>
+                  <select
+                    value={estadoObraNueva}
+                    onChange={(e) => setEstadoObraNueva(e.target.value)}
+                    className="w-full px-2.5 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs"
+                  >
+                    <option value="En cartelera">En cartelera</option>
+                    <option value="Próximamente">Próximamente</option>
+                    <option value="Finalizada">Archivo Histórico</option>
+                  </select>
+                </div>
               </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">URL Afiche / Imagen</label>
                 <input
@@ -1450,6 +1552,55 @@ export default function AdminDashboard({ alAbrirLogin }) {
                   className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
                 />
               </div>
+
+              {/* Opción rápida para programar fecha de función en ese teatro al mismo tiempo */}
+              <div className="p-3 bg-slate-950 border border-slate-800 rounded-xl space-y-2">
+                <label className="flex items-center gap-2 text-xs text-slate-200 font-semibold cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={programarAlCrear}
+                    onChange={(e) => setProgramarAlCrear(e.target.checked)}
+                    className="w-4 h-4 accent-teatro-600"
+                  />
+                  Programar también fecha, hora y precio de función en este teatro ahora
+                </label>
+
+                {programarAlCrear && (
+                  <div className="grid grid-cols-3 gap-2 pt-2">
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-1">Fecha *</label>
+                      <input
+                        type="date"
+                        required={programarAlCrear}
+                        value={fechaObraInicial}
+                        onChange={(e) => setFechaObraInicial(e.target.value)}
+                        className="w-full px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-1">Hora *</label>
+                      <input
+                        type="time"
+                        required={programarAlCrear}
+                        value={horaObraInicial}
+                        onChange={(e) => setHoraObraInicial(e.target.value)}
+                        className="w-full px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] text-slate-400 mb-1">Precio Base (Bs.)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={precioObraInicial}
+                        onChange={(e) => setPrecioObraInicial(e.target.value)}
+                        className="w-full px-2 py-1.5 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
               <div className="pt-2 flex gap-3">
                 <button
                   type="button"
@@ -1462,7 +1613,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
                   type="submit"
                   className="w-2/3 py-2 px-4 bg-teatro-700 hover:bg-teatro-600 text-white font-bold rounded-xl text-xs transition"
                 >
-                  Guardar Obra
+                  Guardar Obra y Teatro
                 </button>
               </div>
             </form>
