@@ -12,6 +12,7 @@ import {
   Sparkles,
   Layers,
   Crown,
+  Unlock,
 } from 'lucide-react';
 
 const ESTILOS_SECTOR = {
@@ -56,7 +57,9 @@ export default function SeleccionAsientos({ funcion, alVolver, alProcederPago, a
   const [sectorFiltro, setSectorFiltro] = useState('TODOS');
   const [cargando, setCargando] = useState(true);
   const [procesando, setProcesando] = useState(false);
+  const [desbloqueando, setDesbloqueando] = useState(false);
   const [error, setError] = useState('');
+  const [mensajeExito, setMensajeExito] = useState('');
 
   const cargarMapa = async () => {
     try {
@@ -64,8 +67,10 @@ export default function SeleccionAsientos({ funcion, alVolver, alProcederPago, a
       const idReal = funcion?.id_presentacion || funcion?.id_funcion || funcion?.id;
       const data = await api.obtenerAsientosFuncion(idReal);
       setDatosSala(data);
+      return data;
     } catch (err) {
       setError(err.message || 'Error al cargar mapa de asientos');
+      return null;
     } finally {
       setCargando(false);
     }
@@ -78,9 +83,64 @@ export default function SeleccionAsientos({ funcion, alVolver, alProcederPago, a
     return () => clearInterval(intervalo);
   }, [funcion?.id_presentacion, funcion?.id_funcion]);
 
-  const toggleAsiento = (asiento) => {
-    if (asiento.estado_actual !== 'DISPONIBLE') return;
+  // Asientos que están bloqueados (RESERVADO u OCUPADO) por el usuario actual en esta función
+  const misAsientosBloqueados = (datosSala?.asientos || []).filter(
+    (a) =>
+      usuario &&
+      a.estado_actual !== 'DISPONIBLE' &&
+      Number(a.id_usuario_titular) === Number(usuario.id)
+  );
 
+  // Módulo de desbloqueo de asientos del cliente para editar su selección y volver a continuar al pago
+  const manejarDesbloquearMisAsientos = async (idAsientoQuitarOpcional = null) => {
+    if (!usuario) {
+      alAbrirLogin();
+      return;
+    }
+    setDesbloqueando(true);
+    setError('');
+    setMensajeExito('');
+    try {
+      const idFuncion = funcion?.id_presentacion || funcion?.id_funcion || funcion?.id;
+      const res = await api.desbloquearReserva(idFuncion);
+      const idsLiberados = res.asientos_desbloqueados || [];
+      const nuevoMapa = await cargarMapa();
+
+      if (nuevoMapa?.asientos && idsLiberados.length > 0) {
+        // Restaurar los asientos desbloqueados en la selección activa para que el usuario pueda quitar o agregar
+        const restaurados = nuevoMapa.asientos.filter(
+          (a) =>
+            idsLiberados.includes(a.id_asiento) &&
+            (idAsientoQuitarOpcional ? a.id_asiento !== idAsientoQuitarOpcional : true)
+        );
+        setAsientosSeleccionados((prev) => {
+          const mapaUnico = new Map();
+          [...prev, ...restaurados].forEach((item) => mapaUnico.set(item.id_asiento, item));
+          return Array.from(mapaUnico.values());
+        });
+      }
+
+      setMensajeExito(
+        res.mensaje ||
+          'Tus asientos fueron desbloqueados y restaurados en tu selección activa. Ahora puedes quitar o añadir butacas y continuar al pago.'
+      );
+    } catch (err) {
+      setError(err.message || 'No se pudieron desbloquear los asientos.');
+    } finally {
+      setDesbloqueando(false);
+    }
+  };
+
+  const toggleAsiento = (asiento) => {
+    // Si el asiento está bloqueado pero pertenece al propio usuario logueado, desbloquearlo automáticamente para editar
+    if (asiento.estado_actual !== 'DISPONIBLE') {
+      if (usuario && Number(asiento.id_usuario_titular) === Number(usuario.id)) {
+        manejarDesbloquearMisAsientos(asiento.id_asiento);
+      }
+      return;
+    }
+
+    setMensajeExito('');
     setAsientosSeleccionados((prev) => {
       const existe = prev.some((a) => a.id_asiento === asiento.id_asiento);
       if (existe) {
@@ -215,6 +275,45 @@ export default function SeleccionAsientos({ funcion, alVolver, alProcederPago, a
         </div>
       )}
 
+      {mensajeExito && (
+        <div className="p-4 bg-emerald-950/80 border border-emerald-600/80 text-emerald-200 text-sm rounded-xl flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 shrink-0 text-emerald-400" />
+          <span>{mensajeExito}</span>
+        </div>
+      )}
+
+      {/* Módulo de Desbloqueo y Edición de Asientos si el cliente volvió para modificar sus asientos bloqueados */}
+      {misAsientosBloqueados.length > 0 && (
+        <div className="p-4 sm:p-5 bg-gradient-to-r from-cyan-950/90 via-slate-900 to-indigo-950/90 border border-cyan-500/60 rounded-2xl shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="space-y-1">
+            <div className="text-xs font-bold uppercase tracking-wider text-cyan-300 flex items-center gap-2">
+              <Unlock className="w-4 h-4 text-cyan-400" />
+              Módulo de Desbloqueo y Edición de Asientos
+            </div>
+            <p className="text-xs sm:text-sm text-slate-200">
+              Tienes{' '}
+              <strong className="text-oro-400">
+                {misAsientosBloqueados.length} asiento(s) bloqueado(s)
+              </strong>{' '}
+              en esta función (
+              <span className="font-mono text-cyan-300 font-semibold">
+                {misAsientosBloqueados.map((a) => `${a.fila}-${a.numero}`).join(', ')}
+              </span>
+              ). Si deseas quitar o cambiar tus asientos, desbloquéalos aquí para editar tu selección y continuar nuevamente al pago.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={() => manejarDesbloquearMisAsientos(null)}
+            disabled={desbloqueando}
+            className="px-4 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-slate-950 font-bold text-xs sm:text-sm rounded-xl shadow-lg transition flex items-center justify-center gap-2 shrink-0 disabled:opacity-50"
+          >
+            <Unlock className="w-4 h-4" />
+            {desbloqueando ? 'Desbloqueando...' : 'Desbloquear y Editar Mis Asientos'}
+          </button>
+        </div>
+      )}
+
       {/* Tarjetas de Sectores y Precios estilo SuperTicket */}
       {!cargando && sectoresDisponibles.length > 0 && (
         <div className="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-3">
@@ -344,6 +443,10 @@ export default function SeleccionAsientos({ funcion, alVolver, alProcederPago, a
               <span>Tu Selección</span>
             </div>
             <div className="flex items-center gap-1.5">
+              <div className="w-4 h-4 rounded bg-cyan-600/80 border border-cyan-300 ring-1 ring-cyan-400" />
+              <span>Tus Asientos Bloqueados (Clic para desbloquear)</span>
+            </div>
+            <div className="flex items-center gap-1.5">
               <div className="w-4 h-4 rounded bg-amber-600/70 border border-amber-500" />
               <span>Reservado (15 min)</span>
             </div>
@@ -392,12 +495,19 @@ export default function SeleccionAsientos({ funcion, alVolver, alProcederPago, a
                                 (a) => a.id_asiento === asiento.id_asiento
                               );
                               const estado = asiento.estado_actual;
+                              const esMioBloqueado =
+                                usuario &&
+                                estado !== 'DISPONIBLE' &&
+                                Number(asiento.id_usuario_titular) === Number(usuario.id);
 
                               let claseColor = estilo.butacaDisponible;
 
                               if (seleccionado) {
                                 claseColor =
                                   'bg-oro-400 text-slate-950 font-extrabold border-oro-300 ring-2 ring-oro-400 scale-110 shadow-[0_0_15px_rgba(245,158,11,0.6)]';
+                              } else if (esMioBloqueado) {
+                                claseColor =
+                                  'bg-cyan-600/80 hover:bg-cyan-500 text-white font-extrabold border-cyan-300 ring-2 ring-cyan-400/60 cursor-pointer hover:scale-110';
                               } else if (estado === 'RESERVADO') {
                                 claseColor =
                                   'bg-amber-600/60 border-amber-500 text-amber-200 cursor-not-allowed opacity-75';
@@ -413,11 +523,15 @@ export default function SeleccionAsientos({ funcion, alVolver, alProcederPago, a
                                 <button
                                   key={asiento.id_asiento}
                                   type="button"
-                                  title={`Butaca ${asiento.fila}-${asiento.numero} (${
-                                    asiento.zona || bloque.nombre
-                                  }) - Bs. ${asiento.precio_asiento || bloque.precio}`}
+                                  title={
+                                    esMioBloqueado
+                                      ? `Tu Butaca Bloqueada ${asiento.fila}-${asiento.numero} — Haz clic para desbloquear y quitar/editar`
+                                      : `Butaca ${asiento.fila}-${asiento.numero} (${
+                                          asiento.zona || bloque.nombre
+                                        }) - Bs. ${asiento.precio_asiento || bloque.precio}`
+                                  }
                                   onClick={() => toggleAsiento(asiento)}
-                                  disabled={estado !== 'DISPONIBLE'}
+                                  disabled={estado !== 'DISPONIBLE' && !esMioBloqueado}
                                   className={`w-7 h-7 sm:w-8 sm:h-8 rounded-lg text-[10px] sm:text-xs font-bold border transition-all duration-150 flex items-center justify-center ${claseColor}`}
                                 >
                                   {asiento.numero}

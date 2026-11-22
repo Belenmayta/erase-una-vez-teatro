@@ -261,17 +261,46 @@ router.put('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res
   }
 });
 
-// Cancelar presentación (administrador): no se borra, queda CANCELADA
+// Eliminar presentación permanentemente de la BD (administrador)
 router.delete('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res, next) => {
+  const client = await db.pool.connect();
   try {
-    const { rows } = await db.query(
-      `UPDATE presentacion SET estado = 'CANCELADA' WHERE id_presentacion = $1 RETURNING id_presentacion, id_presentacion AS id_funcion, estado`,
-      [req.params.id]
+    await client.query('BEGIN');
+    const idPres = Number(req.params.id);
+    const { rows: existe } = await client.query(
+      `SELECT id_presentacion FROM presentacion WHERE id_presentacion = $1`,
+      [idPres]
     );
-    if (!rows[0]) return res.status(404).json({ error: 'Presentación no encontrada' });
-    res.json(rows[0]);
+    if (!existe[0]) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Presentación no encontrada' });
+    }
+
+    // Limpiar boletos, pagos, ingresos y ventas asociados a esta presentación
+    await client.query(
+      `DELETE FROM ingreso WHERE id_boleto IN (SELECT id_boleto FROM boleto WHERE id_presentacion = $1)`,
+      [idPres]
+    );
+    await client.query(
+      `DELETE FROM pago WHERE id_venta IN (SELECT id_venta FROM venta WHERE id_presentacion = $1)`,
+      [idPres]
+    );
+    await client.query(`DELETE FROM boleto WHERE id_presentacion = $1`, [idPres]);
+    await client.query(`DELETE FROM venta WHERE id_presentacion = $1`, [idPres]);
+    await client.query(`DELETE FROM presentacion WHERE id_presentacion = $1`, [idPres]);
+
+    await client.query('COMMIT');
+    res.json({
+      id_presentacion: idPres,
+      id_funcion: idPres,
+      eliminado: true,
+      mensaje: 'Función eliminada permanentemente de la base de datos',
+    });
   } catch (e) {
+    await client.query('ROLLBACK');
     next(e);
+  } finally {
+    client.release();
   }
 });
 
@@ -330,17 +359,20 @@ router.get('/:id/asientos', async (req, res, next) => {
       [presentacion.id_sala]
     );
 
-    // 3. Obtener asientos ocupados/reservados por boletos activos de ESTA presentación
+    // 3. Obtener asientos ocupados/reservados por boletos activos de ESTA presentación (con titular de la venta)
     const boletosRes = await db.query(
-      `SELECT b.id_asiento, b.estado AS estado_boleto, b.tipo AS tipo_boleto
+      `SELECT b.id_asiento, b.id_boleto, b.id_venta, b.estado AS estado_boleto, b.tipo AS tipo_boleto,
+              v.id_usuario AS id_usuario_titular
          FROM boleto b
+         LEFT JOIN venta v ON v.id_venta = b.id_venta
         WHERE b.id_presentacion = $1
           AND b.estado NOT IN ('ANULADO')`,
       [id]
     );
 
-    // 4. Construir mapa: id_asiento -> estado_actual
+    // 4. Construir mapa: id_asiento -> estado_actual + titular
     const estadoMap = {};
+    const titularMap = {};
     boletosRes.rows.forEach((b) => {
       if (b.estado_boleto === 'RESERVADO') {
         estadoMap[b.id_asiento] = 'RESERVADO';
@@ -349,9 +381,14 @@ router.get('/:id/asientos', async (req, res, next) => {
       } else {
         estadoMap[b.id_asiento] = 'OCUPADO';
       }
+      titularMap[b.id_asiento] = {
+        id_usuario_titular: b.id_usuario_titular || null,
+        id_venta_titular: b.id_venta || null,
+        estado_boleto: b.estado_boleto,
+      };
     });
 
-    // 5. Combinar cada asiento con su estado_actual, su sector y su precio_asiento
+    // 5. Combinar cada asiento con su estado_actual, su sector, precio_asiento y titular
     const asientosConEstado = asientosRes.rows.map((a) => {
       const infoSector = calcularSectorYPrecio(
         a.fila,
@@ -360,12 +397,16 @@ router.get('/:id/asientos', async (req, res, next) => {
         a.tipo,
         presentacion.sala_nombre
       );
+      const infoTitular = titularMap[a.id_asiento] || {};
       return {
         ...a,
         sector: infoSector.sector,
         zona: infoSector.zona_nombre,
         precio_asiento: infoSector.precio,
         estado_actual: estadoMap[a.id_asiento] || 'DISPONIBLE',
+        id_usuario_titular: infoTitular.id_usuario_titular || null,
+        id_venta_titular: infoTitular.id_venta_titular || null,
+        estado_boleto: infoTitular.estado_boleto || null,
       };
     });
 

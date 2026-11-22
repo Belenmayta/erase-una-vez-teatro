@@ -10,6 +10,7 @@ import {
   Ticket,
   Copy,
   Check,
+  Unlock,
 } from 'lucide-react';
 
 export default function PagoQR({ venta, alVolver, alVerBoletos }) {
@@ -87,15 +88,15 @@ export default function PagoQR({ venta, alVolver, alVerBoletos }) {
 
   return (
     <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-      {/* Botón Volver */}
-      {!pagoExitoso && (
+      {/* Barra Superior: Volver a selección de asientos / Desbloquear y editar selección */}
+      <div className="flex flex-wrap items-center justify-between gap-3">
         <button
           onClick={alVolver}
-          className="inline-flex items-center gap-2 text-sm text-slate-400 hover:text-white transition"
+          className="inline-flex items-center gap-2 text-sm text-slate-300 hover:text-white bg-slate-900/80 hover:bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl transition"
         >
-          <ArrowLeft className="w-4 h-4" /> Volver a selección de asientos
+          <ArrowLeft className="w-4 h-4 text-oro-400" /> Volver a selección de asientos (Desbloquear / Editar)
         </button>
-      )}
+      </div>
 
       {error && (
         <div className="p-4 bg-red-950/80 border border-red-700 text-red-200 text-sm rounded-2xl flex items-center gap-3">
@@ -140,6 +141,12 @@ export default function PagoQR({ venta, alVolver, alVerBoletos }) {
               className="py-3 px-8 bg-gradient-to-r from-teatro-700 to-teatro-600 hover:from-teatro-600 hover:to-teatro-500 text-white font-semibold rounded-xl text-sm shadow-xl shadow-teatro-900/40 transition flex items-center justify-center gap-2"
             >
               <Ticket className="w-4 h-4 text-oro-400" /> Ver Mis Boletos Digitales
+            </button>
+            <button
+              onClick={alVolver}
+              className="py-3 px-6 bg-cyan-950/80 hover:bg-cyan-900 text-cyan-200 border border-cyan-600/50 font-semibold rounded-xl text-sm transition flex items-center justify-center gap-2"
+            >
+              <Unlock className="w-4 h-4 text-cyan-400" /> Desbloquear y Editar Asientos
             </button>
           </div>
         </div>

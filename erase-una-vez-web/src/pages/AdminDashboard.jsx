@@ -503,6 +503,68 @@ export default function AdminDashboard({ alAbrirLogin }) {
     }
   };
 
+  // Eliminación permanente en BD (para no sobrecargar la base de datos con registros en desuso)
+  const eliminarObraPermanentemente = async (obra) => {
+    const ok = window.confirm(
+      `¿Eliminar permanentemente la obra "${obra.titulo}" de la base de datos?\n\nEsta acción borrará la obra y sus funciones asociadas para liberar espacio en la base de datos.`
+    );
+    if (!ok) return;
+    try {
+      const res = await api.eliminarObra(obra.id_obra);
+      mostrarNotif('exito', res.mensaje || `Obra "${obra.titulo}" eliminada de la base de datos.`);
+      cargarDatos();
+    } catch (err) {
+      mostrarNotif('error', err.message || 'No se pudo eliminar la obra');
+    }
+  };
+
+  const eliminarFuncionPermanentemente = async (f) => {
+    const idFunc = f.id_presentacion || f.id_funcion;
+    const ok = window.confirm(
+      `¿Eliminar permanentemente la función de "${f.titulo}" (${f.fecha} - ${f.hora_inicio}) de la base de datos?`
+    );
+    if (!ok) return;
+    try {
+      const res = await api.cancelarFuncion(idFunc);
+      mostrarNotif('exito', res.mensaje || 'Función eliminada permanentemente de la base de datos.');
+      cargarDatos();
+    } catch (err) {
+      mostrarNotif('error', err.message || 'No se pudo eliminar la función');
+    }
+  };
+
+  const eliminarCursoPermanentemente = async (c) => {
+    const ok = window.confirm(
+      `¿Eliminar permanentemente el taller "${c.nombre}" de la base de datos?`
+    );
+    if (!ok) return;
+    try {
+      const res = await api.eliminarCurso(c.id_curso);
+      mostrarNotif('exito', res.mensaje || `Taller "${c.nombre}" eliminado de la base de datos.`);
+      cargarDatos();
+    } catch (err) {
+      mostrarNotif('error', err.message || 'No se pudo eliminar el taller');
+    }
+  };
+
+  const eliminarUsuarioPermanentemente = async (u) => {
+    if (Number(u.id_usuario) === Number(usuario?.id)) {
+      mostrarNotif('error', 'No puedes eliminar tu propia cuenta activa de Administrador.');
+      return;
+    }
+    const ok = window.confirm(
+      `¿Eliminar permanentemente al usuario "${u.nombres} ${u.apellidos}" (${u.correo}) de la base de datos?\n\nEsto liberará registros innecesarios de la base de datos.`
+    );
+    if (!ok) return;
+    try {
+      const res = await api.eliminarUsuario(u.id_usuario);
+      mostrarNotif('exito', res.mensaje || 'Usuario eliminado permanentemente de la base de datos.');
+      cargarDatos();
+    } catch (err) {
+      mostrarNotif('error', err.message || 'No se pudo eliminar el usuario');
+    }
+  };
+
   if (!usuario || !esAdmin) {
     return (
       <div className="max-w-md mx-auto my-20 p-8 bg-slate-900 border border-slate-800 rounded-3xl text-center space-y-4">
@@ -799,6 +861,14 @@ export default function AdminDashboard({ alAbrirLogin }) {
                       <option value="Próximamente">Próximamente</option>
                       <option value="Finalizada">Finalizada (Archivo)</option>
                     </select>
+                    <button
+                      type="button"
+                      onClick={() => eliminarObraPermanentemente(o)}
+                      className="px-2.5 py-1.5 bg-red-950/80 hover:bg-red-900 text-red-200 border border-red-700/60 rounded-xl text-[11px] font-bold transition flex items-center justify-center gap-1"
+                      title="Eliminar obra permanentemente de la BD"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-red-400" /> Eliminar Obra
+                    </button>
                   </div>
                 </div>
               ))}
@@ -817,7 +887,8 @@ export default function AdminDashboard({ alAbrirLogin }) {
                     <th className="p-3">Sala</th>
                     <th className="p-3">Precio</th>
                     <th className="p-3">Cupo Gratuito</th>
-                    <th className="p-3 rounded-r-xl">Estado</th>
+                    <th className="p-3">Estado</th>
+                    <th className="p-3 rounded-r-xl text-center">Acción</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
@@ -834,6 +905,16 @@ export default function AdminDashboard({ alAbrirLogin }) {
                         <span className="px-2 py-0.5 rounded-full font-bold text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-700">
                           {f.estado}
                         </span>
+                      </td>
+                      <td className="p-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => eliminarFuncionPermanentemente(f)}
+                          className="px-2.5 py-1 bg-red-950/80 hover:bg-red-900 text-red-200 border border-red-700/60 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition"
+                          title="Eliminar función permanentemente"
+                        >
+                          <Trash2 className="w-3 h-3 text-red-400" /> Eliminar
+                        </button>
                       </td>
                     </tr>
                   ))}
@@ -966,6 +1047,16 @@ export default function AdminDashboard({ alAbrirLogin }) {
                     <span>Fecha Inicio:</span>
                     <span>{c.fecha_inicio}</span>
                   </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-800 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={() => eliminarCursoPermanentemente(c)}
+                    className="px-3 py-1.5 bg-red-950/80 hover:bg-red-900 text-red-200 border border-red-700/60 rounded-xl text-xs font-bold inline-flex items-center gap-1.5 transition"
+                  >
+                    <Trash2 className="w-3.5 h-3.5 text-red-400" /> Eliminar Taller
+                  </button>
                 </div>
               </div>
             ))}
@@ -1129,7 +1220,8 @@ export default function AdminDashboard({ alAbrirLogin }) {
                     <th className="p-3">Nombre Completo</th>
                     <th className="p-3">Correo Electrónico</th>
                     <th className="p-3">Rol</th>
-                    <th className="p-3 rounded-r-xl">Estado</th>
+                    <th className="p-3">Estado</th>
+                    <th className="p-3 rounded-r-xl text-center">Acciones</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
@@ -1149,6 +1241,20 @@ export default function AdminDashboard({ alAbrirLogin }) {
                         <span className="text-emerald-400 font-semibold">
                           {u.estado ? 'Activo' : 'Inactivo'}
                         </span>
+                      </td>
+                      <td className="p-3 text-center">
+                        {Number(u.id_usuario) === Number(usuario?.id) ? (
+                          <span className="text-[11px] text-slate-500 italic">Sesión actual</span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => eliminarUsuarioPermanentemente(u)}
+                            className="px-2.5 py-1 bg-red-950/80 hover:bg-red-900 text-red-200 border border-red-700/60 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition"
+                            title="Eliminar usuario permanentemente de la BD"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-red-400" /> Eliminar Usuario
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -1841,38 +1947,51 @@ export default function AdminDashboard({ alAbrirLogin }) {
             <form onSubmit={crearUsuarioStaff} className="space-y-3">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Nombres *</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Nombres (solo letras) *
+                  </label>
                   <input
                     type="text"
                     required
                     value={nombresUser}
-                    onChange={(e) => setNombresUser(e.target.value)}
+                    onChange={(e) =>
+                      setNombresUser(e.target.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, ''))
+                    }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-300 mb-1">Apellidos *</label>
+                  <label className="block text-xs font-semibold text-slate-300 mb-1">
+                    Apellidos (solo letras) *
+                  </label>
                   <input
                     type="text"
                     required
                     value={apellidosUser}
-                    onChange={(e) => setApellidosUser(e.target.value)}
+                    onChange={(e) =>
+                      setApellidosUser(e.target.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, ''))
+                    }
                     className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
                   />
                 </div>
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Correo Electrónico *</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Correo Electrónico Real (Verificado por DNS MX) *
+                </label>
                 <input
                   type="email"
                   required
                   value={correoUser}
                   onChange={(e) => setCorreoUser(e.target.value)}
                   className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
+                  placeholder="personal@gmail.com"
                 />
               </div>
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1">Contraseña (Mín. 8) *</label>
+                <label className="block text-xs font-semibold text-slate-300 mb-1">
+                  Contraseña (Mín. 8 caracteres, letras y números) *
+                </label>
                 <input
                   type="password"
                   required

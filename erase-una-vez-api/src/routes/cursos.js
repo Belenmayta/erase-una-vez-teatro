@@ -221,17 +221,41 @@ router.put('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res
   }
 });
 
-// 5. Dar de baja curso (Administrador): estado INACTIVO
+// 5. Eliminar taller permanentemente de la BD (Administrador)
 router.delete('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res, next) => {
+  const client = await db.pool.connect();
   try {
-    const { rows } = await db.query(
-      `UPDATE curso SET estado = 'INACTIVO' WHERE id_curso = $1 RETURNING id_curso, nombre, estado`,
-      [req.params.id]
+    await client.query('BEGIN');
+    const idCurso = Number(req.params.id);
+    const { rows } = await client.query(
+      `SELECT id_curso, nombre FROM curso WHERE id_curso = $1`,
+      [idCurso]
     );
-    if (!rows[0]) return res.status(404).json({ error: 'Curso no encontrado' });
-    res.json(rows[0]);
+    if (!rows[0]) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Curso no encontrado' });
+    }
+
+    await client.query(
+      `DELETE FROM pago_mensualidad WHERE id_inscripcion IN (SELECT id_inscripcion FROM inscripcion WHERE id_curso = $1)`,
+      [idCurso]
+    );
+    await client.query(`DELETE FROM inscripcion WHERE id_curso = $1`, [idCurso]);
+    await client.query(`DELETE FROM horario_curso WHERE id_curso = $1`, [idCurso]);
+    await client.query(`DELETE FROM curso WHERE id_curso = $1`, [idCurso]);
+
+    await client.query('COMMIT');
+    res.json({
+      id_curso: idCurso,
+      nombre: rows[0].nombre,
+      eliminado: true,
+      mensaje: `Taller "${rows[0].nombre}" eliminado permanentemente de la base de datos`,
+    });
   } catch (e) {
+    await client.query('ROLLBACK');
     next(e);
+  } finally {
+    client.release();
   }
 });
 

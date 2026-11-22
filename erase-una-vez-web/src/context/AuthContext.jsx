@@ -27,6 +27,18 @@ export function AuthProvider({ children }) {
 
   const login = async (correo, contrasena) => {
     const res = await api.login(correo, contrasena);
+    if (res.requiere_mfa) {
+      return res;
+    }
+    if (res.token && res.usuario) {
+      guardarSesion(res.token, res.usuario);
+      setUsuario(res.usuario);
+    }
+    return res;
+  };
+
+  const confirmarMfa = async (mfa_token, codigo_mfa) => {
+    const res = await api.verificarMfa(mfa_token, codigo_mfa);
     guardarSesion(res.token, res.usuario);
     setUsuario(res.usuario);
     return res.usuario;
@@ -34,36 +46,17 @@ export function AuthProvider({ children }) {
 
   const registro = async (datos) => {
     const res = await api.registro(datos);
-    // Login automático tras registro
-    return await login(datos.correo, datos.contrasena);
+    if (res.token && res.usuario) {
+      guardarSesion(res.token, res.usuario);
+      setUsuario(res.usuario);
+      return res.usuario;
+    }
+    return res;
   };
 
   const logout = () => {
     eliminarSesion();
     setUsuario(null);
-  };
-
-  // Ayudante de inicio rápido de demostración
-  const loginDemo = async (rol) => {
-    if (rol === 'ADMINISTRADOR') {
-      try {
-        return await login('jaqueline@teatro.com', 'teatro123');
-      } catch {
-        return await login('jaqueline@teatro.com', 'Admin1234!');
-      }
-    } else if (rol === 'RECEPCION') {
-      try {
-        return await login('recepcion@teatro.com', 'recepcion123');
-      } catch {
-        return await login('recepcion@teatro.com', 'Recepcion123!');
-      }
-    } else {
-      try {
-        return await login('maria@comprador.com', 'comprador123');
-      } catch {
-        return await login('maria@comprador.com', 'Comprador123!');
-      }
-    }
   };
 
   const esAdmin = usuario?.rol === 'ADMINISTRADOR';
@@ -77,9 +70,9 @@ export function AuthProvider({ children }) {
         usuario,
         cargando,
         login,
+        confirmarMfa,
         registro,
         logout,
-        loginDemo,
         esAdmin,
         esDocente,
         esRecepcion,

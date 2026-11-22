@@ -13,6 +13,9 @@ import {
   Plus,
   Sparkles,
   Heart,
+  LogOut,
+  MailCheck,
+  RefreshCw,
 } from 'lucide-react';
 
 const DIAS_SEMANA = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
@@ -31,8 +34,11 @@ function formatearHora(horaStr) {
 export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
   const { usuario, esAdmin, esRecepcion } = useAuth();
   const [cursos, setCursos] = useState([]);
+  const [misInscripciones, setMisInscripciones] = useState([]);
   const [cargando, setCargando] = useState(true);
   const [error, setError] = useState('');
+  const [notificacionGeneral, setNotificacionGeneral] = useState('');
+  const [desinscribiendoId, setDesinscribiendoId] = useState(null);
 
   // Modal de inscripción
   const [cursoSeleccionado, setCursoSeleccionado] = useState(null);
@@ -44,6 +50,9 @@ export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
   const [ci, setCi] = useState('');
   const [fechaNacimiento, setFechaNacimiento] = useState('');
   const [telefono, setTelefono] = useState('');
+  const [correoEstudiante, setCorreoEstudiante] = useState('');
+  const [estadoCorreoEst, setEstadoCorreoEst] = useState(null);
+  const [verificandoCorreoEst, setVerificandoCorreoEst] = useState(false);
   const [tutorNombre, setTutorNombre] = useState('');
   const [tutorTelefono, setTutorTelefono] = useState('');
   const [guardandoInscripcion, setGuardandoInscripcion] = useState(false);
@@ -51,8 +60,17 @@ export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
 
   const cargarCursos = async () => {
     try {
-      const data = await api.obtenerCursos();
-      setCursos(data);
+      const promesas = [api.obtenerCursos()];
+      if (usuario) {
+        promesas.push(api.obtenerInscripciones().catch(() => []));
+      }
+      const [dataCursos, dataInsc] = await Promise.all(promesas);
+      setCursos(Array.isArray(dataCursos) ? dataCursos : []);
+      if (usuario && Array.isArray(dataInsc)) {
+        setMisInscripciones(dataInsc.filter((i) => i.estado === 'ACTIVA'));
+      } else {
+        setMisInscripciones([]);
+      }
     } catch (err) {
       setError('Error al cargar catálogo de cursos');
     } finally {
@@ -62,7 +80,54 @@ export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
 
   useEffect(() => {
     cargarCursos();
-  }, []);
+  }, [usuario?.id]);
+
+  // Módulo para Desinscribirse de un Taller
+  const manejarDesinscribir = async (inscripcion) => {
+    const nombreAlumno = `${inscripcion.estudiante_nombres || ''} ${inscripcion.estudiante_apellidos || ''}`.trim();
+    const confirmar = window.confirm(
+      `¿Estás seguro de desinscribir a "${nombreAlumno || 'este participante'}" del taller "${inscripcion.curso_nombre}"?\n\nTu cupo será liberado inmediatamente.`
+    );
+    if (!confirmar) return;
+
+    setDesinscribiendoId(inscripcion.id_inscripcion);
+    setError('');
+    setNotificacionGeneral('');
+    try {
+      const res = await api.desinscribirTaller(inscripcion.id_inscripcion);
+      setNotificacionGeneral(
+        res.mensaje || `Te has desinscrito exitosamente del taller "${inscripcion.curso_nombre}".`
+      );
+      await cargarCursos();
+    } catch (err) {
+      setError(err.message || 'No se pudo procesar la desinscripción del taller.');
+    } finally {
+      setDesinscribiendoId(null);
+    }
+  };
+
+  const verificarCorreoParticipante = async (correoEval = correoEstudiante) => {
+    const limpio = String(correoEval || '').trim().toLowerCase();
+    if (!limpio) return true;
+    setVerificandoCorreoEst(true);
+    setEstadoCorreoEst(null);
+    try {
+      const res = await api.verificarCorreo(limpio, false);
+      setEstadoCorreoEst({
+        valido: true,
+        mensaje: res.mensaje || 'Correo verificado (servidor MX activo)',
+      });
+      return true;
+    } catch (err) {
+      setEstadoCorreoEst({
+        valido: false,
+        mensaje: err.message || 'El correo ingresado no existe o su dominio no es válido',
+      });
+      return false;
+    } finally {
+      setVerificandoCorreoEst(false);
+    }
+  };
 
   const abrirModalInscripcion = async (curso) => {
     if (!usuario) {
@@ -89,21 +154,73 @@ export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
 
   const manejarInscribir = async (e) => {
     e.preventDefault();
-    setGuardandoInscripcion(true);
     setError('');
+
+    // Validación estricta de parámetros si se registra un nuevo participante
+    if (modoNuevoEstudiante) {
+      const regexLetras = /^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+(?:\s+[A-Za-zÁÉÍÓÚÜÑáéíóúüñ]+)*$/;
+      if (!nombres.trim() || nombres.trim().length < 2 || !regexLetras.test(nombres.trim())) {
+        setError('El campo Nombres solo permite letras y espacios (mínimo 2 caracteres, sin números ni símbolos).');
+        return;
+      }
+      if (!apellidos.trim() || apellidos.trim().length < 2 || !regexLetras.test(apellidos.trim())) {
+        setError('El campo Apellidos solo permite letras y espacios (mínimo 2 caracteres, sin números ni símbolos).');
+        return;
+      }
+      if (ci.trim() && !/^\d{5,10}(?:-[0-9A-Za-z]{1,2})?(?:\s?(?:LP|CB|SC|OR|PT|TJ|CH|BE|PD))?$/i.test(ci.trim())) {
+        setError('El C.I. debe contener entre 5 y 10 dígitos numéricos (ej. 6543210 LP).');
+        return;
+      }
+      if (!fechaNacimiento) {
+        setError('Debe indicar la fecha de nacimiento del participante.');
+        return;
+      }
+      const fn = new Date(fechaNacimiento);
+      const edadAnios = (Date.now() - fn.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
+      if (isNaN(fn.getTime()) || edadAnios < 3 || edadAnios > 95) {
+        setError('Ingrese una fecha de nacimiento válida (edad permitida entre 3 y 95 años).');
+        return;
+      }
+
+      const esMenor = cursoSeleccionado.publico === 'NINOS' || cursoSeleccionado.publico === 'JOVENES';
+      const telContacto = (esMenor ? tutorTelefono || telefono : telefono || tutorTelefono)
+        .replace(/[\s\-()]/g, '')
+        .replace(/^\+?591/, '');
+
+      if (!/^[67]\d{7}$/.test(telContacto)) {
+        setError('Debe ingresar un número de celular válido de Bolivia (8 dígitos comenzando con 6 o 7).');
+        return;
+      }
+
+      if (esMenor && tutorNombre.trim() && !regexLetras.test(tutorNombre.trim())) {
+        setError('El nombre del tutor solo debe contener letras y espacios.');
+        return;
+      }
+
+      if (correoEstudiante.trim()) {
+        const okMail = await verificarCorreoParticipante(correoEstudiante);
+        if (!okMail) {
+          setError('El correo electrónico ingresado no existe o su dominio no recibe correos.');
+          return;
+        }
+      }
+    }
+
+    setGuardandoInscripcion(true);
     try {
       let idEst = idEstudianteElegido;
 
       // Si es un nuevo estudiante, crearlo primero
       if (modoNuevoEstudiante) {
         const nuevo = await api.crearEstudiante({
-          nombres,
-          apellidos,
-          ci,
+          nombres: nombres.trim(),
+          apellidos: apellidos.trim(),
+          ci: ci.trim() || null,
           fecha_nacimiento: fechaNacimiento,
-          telefono,
-          tutor_nombre: tutorNombre,
-          tutor_telefono: tutorTelefono,
+          telefono: telefono.trim() || tutorTelefono.trim(),
+          correo: correoEstudiante.trim() || usuario?.correo || null,
+          tutor_nombre: tutorNombre.trim() || null,
+          tutor_telefono: tutorTelefono.trim() || telefono.trim() || null,
         });
         idEst = nuevo.id_estudiante;
       }
@@ -118,6 +235,8 @@ export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
         setCi('');
         setFechaNacimiento('');
         setTelefono('');
+        setCorreoEstudiante('');
+        setEstadoCorreoEst(null);
         setTutorNombre('');
         setTutorTelefono('');
         if (esAdmin) {
@@ -147,6 +266,65 @@ export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
           Diseñados para niñas, niños, adolescentes y adultos en nuestra sede de Sopocachi.
         </p>
       </div>
+
+      {notificacionGeneral && (
+        <div className="max-w-4xl mx-auto p-4 bg-emerald-950/80 border border-emerald-600/80 text-emerald-200 text-sm rounded-2xl flex items-center gap-3">
+          <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />
+          <span>{notificacionGeneral}</span>
+        </div>
+      )}
+
+      {/* Módulo de Mis Inscripciones Activas y Desinscripción de Talleres */}
+      {usuario && misInscripciones.length > 0 && (
+        <div className="max-w-5xl mx-auto bg-slate-900/95 border border-teatro-700/60 rounded-3xl p-6 shadow-2xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
+            <div>
+              <span className="text-[11px] font-bold uppercase tracking-wider text-oro-400 flex items-center gap-1.5">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                Módulo de Gestión y Desinscripción de Talleres
+              </span>
+              <h2 className="text-lg font-bold font-theater text-white">
+                {esAdmin ? 'Inscripciones Activas en Talleres' : 'Mis Talleres Inscritos'} ({misInscripciones.length})
+              </h2>
+            </div>
+            <span className="text-xs text-slate-400">
+              Puedes darte de baja / desinscribirte de un taller en cualquier momento para liberar el cupo
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {misInscripciones.map((insc) => (
+              <div
+                key={insc.id_inscripcion}
+                className="p-4 bg-slate-950 border border-slate-800 rounded-2xl flex items-center justify-between gap-3"
+              >
+                <div className="space-y-0.5">
+                  <div className="text-sm font-bold text-white">{insc.curso_nombre}</div>
+                  <div className="text-xs text-slate-300">
+                    Participante:{' '}
+                    <strong className="text-oro-400">
+                      {insc.estudiante_nombres} {insc.estudiante_apellidos}
+                    </strong>
+                  </div>
+                  <div className="text-[11px] text-slate-500">
+                    Inscrito el {String(insc.fecha_inscripcion).slice(0, 10)} &bull; Mensualidad: Bs. {insc.mensualidad}
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => manejarDesinscribir(insc)}
+                  disabled={desinscribiendoId === insc.id_inscripcion}
+                  className="px-3 py-2 bg-red-950/90 hover:bg-red-900 text-red-200 border border-red-700/70 rounded-xl text-xs font-bold transition flex items-center gap-1.5 shrink-0 disabled:opacity-50"
+                >
+                  <LogOut className="w-3.5 h-3.5 text-red-400" />
+                  {desinscribiendoId === insc.id_inscripcion ? 'Procesando...' : 'Desinscribirme'}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {cargando ? (
         <div className="text-center py-20 text-slate-400 text-sm">
@@ -332,50 +510,127 @@ export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">Nombres *</label>
+                      <label className="block text-xs font-medium text-slate-300 mb-1">
+                        Nombres (solo letras) *
+                      </label>
                       <input
                         type="text"
                         required
                         value={nombres}
-                        onChange={(e) => setNombres(e.target.value)}
+                        onChange={(e) =>
+                          setNombres(e.target.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, ''))
+                        }
                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
                         placeholder="Ej. Mateo"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">Apellidos *</label>
+                      <label className="block text-xs font-medium text-slate-300 mb-1">
+                        Apellidos (solo letras) *
+                      </label>
                       <input
                         type="text"
                         required
                         value={apellidos}
-                        onChange={(e) => setApellidos(e.target.value)}
+                        onChange={(e) =>
+                          setApellidos(e.target.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, ''))
+                        }
                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
-                        placeholder="Ej. Perez"
+                        placeholder="Ej. Pérez"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">CI</label>
+                      <label className="block text-xs font-medium text-slate-300 mb-1">
+                        C.I. (5 a 10 dígitos)
+                      </label>
                       <input
                         type="text"
+                        maxLength={15}
                         value={ci}
-                        onChange={(e) => setCi(e.target.value)}
+                        onChange={(e) => setCi(e.target.value.replace(/[^0-9A-Za-z\-\s]/g, ''))}
                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
-                        placeholder="Ej. 1234567 LP"
+                        placeholder="Ej. 6543210 LP"
                       />
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-slate-300 mb-1">Fecha de Nacimiento</label>
+                      <label className="block text-xs font-medium text-slate-300 mb-1">
+                        Fecha de Nacimiento *
+                      </label>
                       <input
                         type="date"
+                        required
                         value={fechaNacimiento}
                         onChange={(e) => setFechaNacimiento(e.target.value)}
                         className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
                       />
                     </div>
                   </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-medium text-slate-300 mb-1">
+                        Celular Contacto (8 dígitos) *
+                      </label>
+                      <input
+                        type="tel"
+                        required={cursoSeleccionado.publico === 'ADULTOS'}
+                        maxLength={8}
+                        value={telefono}
+                        onChange={(e) => setTelefono(e.target.value.replace(/\D/g, '').slice(0, 8))}
+                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
+                        placeholder="Ej. 71234567"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <label className="block text-xs font-medium text-slate-300">
+                          Correo Electrónico
+                        </label>
+                        {correoEstudiante && (
+                          <button
+                            type="button"
+                            onClick={() => verificarCorreoParticipante(correoEstudiante)}
+                            disabled={verificandoCorreoEst}
+                            className="text-[10px] text-oro-400 hover:underline flex items-center gap-0.5"
+                          >
+                            <RefreshCw className={`w-2.5 h-2.5 ${verificandoCorreoEst ? 'animate-spin' : ''}`} />
+                            Verificar MX
+                          </button>
+                        )}
+                      </div>
+                      <input
+                        type="email"
+                        value={correoEstudiante}
+                        onChange={(e) => {
+                          setCorreoEstudiante(e.target.value);
+                          setEstadoCorreoEst(null);
+                        }}
+                        onBlur={() => {
+                          if (correoEstudiante.includes('@')) {
+                            verificarCorreoParticipante(correoEstudiante);
+                          }
+                        }}
+                        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
+                        placeholder="alumno@gmail.com"
+                      />
+                    </div>
+                  </div>
+
+                  {estadoCorreoEst && (
+                    <div
+                      className={`p-2 rounded-lg text-[11px] flex items-center gap-1.5 ${
+                        estadoCorreoEst.valido
+                          ? 'bg-emerald-950/70 border border-emerald-700/60 text-emerald-300'
+                          : 'bg-red-950/70 border border-red-700/60 text-red-300'
+                      }`}
+                    >
+                      <MailCheck className="w-3.5 h-3.5 shrink-0" />
+                      <span>{estadoCorreoEst.mensaje}</span>
+                    </div>
+                  )}
 
                   {cursoSeleccionado.publico === 'NINOS' || cursoSeleccionado.publico === 'JOVENES' ? (
                     <div className="p-3 bg-slate-950/80 border border-slate-800 rounded-xl space-y-2">
@@ -384,21 +639,32 @@ export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
                       </span>
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="block text-[11px] text-slate-300 mb-1">Nombre Completo Tutor</label>
+                          <label className="block text-[11px] text-slate-300 mb-1">
+                            Nombre Completo Tutor (solo letras) *
+                          </label>
                           <input
                             type="text"
+                            required
                             value={tutorNombre}
-                            onChange={(e) => setTutorNombre(e.target.value)}
+                            onChange={(e) =>
+                              setTutorNombre(e.target.value.replace(/[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]/g, ''))
+                            }
                             className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
-                            placeholder="Ej. Maria Perez Rocha"
+                            placeholder="Ej. María Pérez Rocha"
                           />
                         </div>
                         <div>
-                          <label className="block text-[11px] text-slate-300 mb-1">Teléfono Tutor</label>
+                          <label className="block text-[11px] text-slate-300 mb-1">
+                            Celular Tutor (8 dígitos: 6 o 7) *
+                          </label>
                           <input
                             type="tel"
+                            required
+                            maxLength={8}
                             value={tutorTelefono}
-                            onChange={(e) => setTutorTelefono(e.target.value)}
+                            onChange={(e) =>
+                              setTutorTelefono(e.target.value.replace(/\D/g, '').slice(0, 8))
+                            }
                             className="w-full px-3 py-1.5 bg-slate-900 border border-slate-700 rounded-lg text-white text-xs focus:outline-none focus:border-teatro-500"
                             placeholder="Ej. 71234567"
                           />

@@ -72,8 +72,14 @@ export const api = {
   // Salud
   verificarSalud: () => request('/salud'),
 
-  // Autenticación
+  // Autenticación, MFA y Verificación de Correo Real (DNS MX)
   login: (correo, contrasena) => request('/auth/login', { method: 'POST', body: { correo, contrasena } }),
+  verificarMfa: (mfa_token, codigo_mfa) =>
+    request('/auth/verificar-mfa', { method: 'POST', body: { mfa_token, codigo_mfa } }),
+  verificarCorreo: (correo, verificar_duplicado = false) =>
+    request('/auth/verificar-correo', { method: 'POST', body: { correo, verificar_duplicado } }),
+  solicitarCodigoRegistro: (datos) =>
+    request('/auth/solicitar-codigo-registro', { method: 'POST', body: datos }),
   registro: (datos) => request('/auth/register', { method: 'POST', body: datos }),
   obtenerPerfil: () => request('/auth/me'),
 
@@ -120,6 +126,8 @@ obtenerAsientosFuncion: (idOObjeto) => {
   },
   obtenerVenta: (id) => request(`/ventas/${id}`),
   anularVenta: (id) => request(`/ventas/${id}/anular`, { method: 'POST' }),
+  desbloquearReserva: (id_funcion, id_venta = null) =>
+    request('/ventas/desbloquear-reserva', { method: 'POST', body: { id_funcion, id_venta } }),
 
   // Pagos QR y Boletos (Sprint 3)
   generarPagoQR: (idVenta) => request(`/pagos/generar-qr/${idVenta}`, { method: 'POST' }),
@@ -143,9 +151,12 @@ obtenerAsientosFuncion: (idOObjeto) => {
   obtenerEstudiante: (id) => request(`/estudiantes/${id}`),
   crearEstudiante: (datos) => request('/estudiantes', { method: 'POST', body: datos }),
   editarEstudiante: (id, datos) => request(`/estudiantes/${id}`, { method: 'PUT', body: datos }),
+  eliminarEstudiante: (id) => request(`/estudiantes/${id}`, { method: 'DELETE' }),
 
   inscribirEstudiante: (id_curso, id_estudiante) =>
     request('/inscripciones', { method: 'POST', body: { id_curso, id_estudiante } }),
+  desinscribirTaller: (id) =>
+    request(`/inscripciones/${id}/desinscribir`, { method: 'POST' }),
   obtenerInscripciones: (filtros = {}) => {
     const params = new URLSearchParams(filtros).toString();
     return request(`/inscripciones${params ? `?${params}` : ''}`);
@@ -174,6 +185,7 @@ obtenerAsientosFuncion: (idOObjeto) => {
   obtenerUsuarios: () => request('/usuarios'),
   crearUsuario: (datos) => request('/usuarios', { method: 'POST', body: datos }),
   actualizarUsuario: (id, datos) => request(`/usuarios/${id}`, { method: 'PATCH', body: datos }),
+  eliminarUsuario: (id) => request(`/usuarios/${id}`, { method: 'DELETE' }),
 
   // Reportes y Dashboard (Sprint 4 y 5)
   obtenerDashboard: () => request('/reportes/dashboard'),

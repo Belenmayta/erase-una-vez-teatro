@@ -1,6 +1,12 @@
 const express = require('express');
 const db = require('../db');
 const { verificarToken, requerirRol } = require('../middleware/auth');
+const {
+  validarNombreApellido,
+  validarCIBolivia,
+  validarTelefonoBolivia,
+  verificarExistenciaCorreo,
+} = require('../utils/validaciones');
 
 const router = express.Router();
 
@@ -8,6 +14,23 @@ router.use(verificarToken);
 
 function esAdminODocente(rol) {
   return rol === 'ADMINISTRADOR' || rol === 'DOCENTE';
+}
+
+function validarFechaNacimiento(fechaStr) {
+  if (!fechaStr) return null;
+  const fecha = new Date(fechaStr);
+  if (isNaN(fecha.getTime())) {
+    return 'La fecha de nacimiento no tiene un formato válido.';
+  }
+  const hoy = new Date();
+  if (fecha > hoy) {
+    return 'La fecha de nacimiento no puede ser una fecha futura.';
+  }
+  const edad = (hoy - fecha) / (365.25 * 24 * 3600 * 1000);
+  if (edad < 3 || edad > 95) {
+    return 'La edad del participante debe estar entre 3 y 95 años.';
+  }
+  return null;
 }
 
 // 1. Listar estudiantes
@@ -76,7 +99,7 @@ router.get('/:id', async (req, res, next) => {
   }
 });
 
-// 3. Registrar estudiante (para inscripción a taller o desde administración)
+// 3. Registrar estudiante con parámetros estrictos y verificación de correo MX
 router.post('/', async (req, res, next) => {
   const {
     nombres,
@@ -90,8 +113,34 @@ router.post('/', async (req, res, next) => {
     id_usuario,
   } = req.body;
 
-  if (!nombres || !apellidos) {
-    return res.status(400).json({ error: 'Complete al menos los nombres y apellidos del estudiante' });
+  const errNom = validarNombreApellido(nombres, 'Nombres del estudiante');
+  if (errNom) return res.status(400).json({ error: errNom });
+
+  const errApe = validarNombreApellido(apellidos, 'Apellidos del estudiante');
+  if (errApe) return res.status(400).json({ error: errApe });
+
+  const errCi = validarCIBolivia(ci, false);
+  if (errCi) return res.status(400).json({ error: errCi });
+
+  const errFecha = validarFechaNacimiento(fecha_nacimiento);
+  if (errFecha) return res.status(400).json({ error: errFecha });
+
+  const errTel = validarTelefonoBolivia(telefono, false, 'Teléfono del estudiante');
+  if (errTel) return res.status(400).json({ error: errTel });
+
+  if (tutor_nombre && String(tutor_nombre).trim()) {
+    const errTutNom = validarNombreApellido(tutor_nombre, 'Nombre del tutor');
+    if (errTutNom) return res.status(400).json({ error: errTutNom });
+  }
+
+  const errTutTel = validarTelefonoBolivia(tutor_telefono, false, 'Teléfono del tutor');
+  if (errTutTel) return res.status(400).json({ error: errTutTel });
+
+  if (correo && String(correo).trim()) {
+    const verifCorreo = await verificarExistenciaCorreo(correo);
+    if (!verifCorreo.valido) {
+      return res.status(400).json({ error: verifCorreo.error });
+    }
   }
 
   try {
@@ -106,12 +155,12 @@ router.post('/', async (req, res, next) => {
         usuarioAsociado,
         nombres.trim(),
         apellidos.trim(),
-        ci || null,
+        ci ? ci.trim() : null,
         fecha_nacimiento || null,
-        telefono || null,
-        correo ? correo.trim() : null,
-        tutor_nombre || null,
-        tutor_telefono || null,
+        telefono ? telefono.trim() : null,
+        correo ? correo.trim().toLowerCase() : null,
+        tutor_nombre ? tutor_nombre.trim() : null,
+        tutor_telefono ? tutor_telefono.trim() : null,
       ]
     );
 
@@ -126,8 +175,23 @@ router.put('/:id', requerirRol('ADMINISTRADOR', 'DOCENTE'), async (req, res, nex
   const { nombres, apellidos, ci, fecha_nacimiento, telefono, correo, tutor_nombre, tutor_telefono } =
     req.body;
 
-  if (!nombres || !apellidos) {
-    return res.status(400).json({ error: 'Complete nombres y apellidos' });
+  const errNom = validarNombreApellido(nombres, 'Nombres del estudiante');
+  if (errNom) return res.status(400).json({ error: errNom });
+
+  const errApe = validarNombreApellido(apellidos, 'Apellidos del estudiante');
+  if (errApe) return res.status(400).json({ error: errApe });
+
+  const errCi = validarCIBolivia(ci, false);
+  if (errCi) return res.status(400).json({ error: errCi });
+
+  const errFecha = validarFechaNacimiento(fecha_nacimiento);
+  if (errFecha) return res.status(400).json({ error: errFecha });
+
+  if (correo && String(correo).trim()) {
+    const verifCorreo = await verificarExistenciaCorreo(correo);
+    if (!verifCorreo.valido) {
+      return res.status(400).json({ error: verifCorreo.error });
+    }
   }
 
   try {
@@ -148,7 +212,7 @@ router.put('/:id', requerirRol('ADMINISTRADOR', 'DOCENTE'), async (req, res, nex
         ci || null,
         fecha_nacimiento || null,
         telefono || null,
-        correo ? correo.trim() : null,
+        correo ? correo.trim().toLowerCase() : null,
         tutor_nombre || null,
         tutor_telefono || null,
         req.params.id,
@@ -158,6 +222,40 @@ router.put('/:id', requerirRol('ADMINISTRADOR', 'DOCENTE'), async (req, res, nex
     res.json(rows[0]);
   } catch (e) {
     next(e);
+  }
+});
+
+// 5. Eliminar permanentemente un estudiante y sus inscripciones (Administrador)
+router.delete('/:id', requerirRol('ADMINISTRADOR'), async (req, res, next) => {
+  const idEst = Number(req.params.id);
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(
+      `DELETE FROM pago_mensualidad
+        WHERE id_inscripcion IN (SELECT id_inscripcion FROM inscripcion WHERE id_estudiante = $1)`,
+      [idEst]
+    );
+    await client.query('DELETE FROM inscripcion WHERE id_estudiante = $1', [idEst]);
+    const { rows } = await client.query(
+      'DELETE FROM estudiante WHERE id_estudiante = $1 RETURNING *',
+      [idEst]
+    );
+    if (!rows[0]) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Estudiante no encontrado' });
+    }
+    await client.query('COMMIT');
+    res.json({
+      ok: true,
+      mensaje: `Estudiante ${rows[0].nombres} ${rows[0].apellidos} eliminado permanentemente.`,
+      estudiante: rows[0],
+    });
+  } catch (e) {
+    await client.query('ROLLBACK');
+    next(e);
+  } finally {
+    client.release();
   }
 });
 

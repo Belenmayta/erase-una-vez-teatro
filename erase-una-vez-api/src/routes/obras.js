@@ -112,17 +112,64 @@ router.put('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res
   }
 });
 
-// Cambiar estado de obra a Finalizada
+// Eliminar permanentemente una obra de la base de datos (Administrador)
 router.delete('/:id', verificarToken, requerirRol('ADMINISTRADOR'), async (req, res, next) => {
+  const idObra = Number(req.params.id);
+  const client = await db.pool.connect();
   try {
-    const { rows } = await db.query(
-      `UPDATE obra SET estado = 'Finalizada' WHERE id_obra = $1 RETURNING id_obra, titulo, estado`,
-      [req.params.id]
+    await client.query('BEGIN');
+
+    // Limpiar en cascada presentaciones, boletos, pagos y ventas asociados a esta obra
+    await client.query(
+      `DELETE FROM ingreso WHERE id_boleto IN (
+         SELECT id_boleto FROM boleto WHERE id_presentacion IN (
+           SELECT id_presentacion FROM presentacion WHERE id_obra = $1
+         )
+       )`,
+      [idObra]
     );
-    if (!rows[0]) return res.status(404).json({ error: 'Obra no encontrada' });
-    res.json(rows[0]);
+    await client.query(
+      `DELETE FROM pago WHERE id_venta IN (
+         SELECT id_venta FROM venta WHERE id_presentacion IN (
+           SELECT id_presentacion FROM presentacion WHERE id_obra = $1
+         )
+       )`,
+      [idObra]
+    );
+    await client.query(
+      `DELETE FROM boleto WHERE id_presentacion IN (
+         SELECT id_presentacion FROM presentacion WHERE id_obra = $1
+       )`,
+      [idObra]
+    );
+    await client.query(
+      `DELETE FROM venta WHERE id_presentacion IN (
+         SELECT id_presentacion FROM presentacion WHERE id_obra = $1
+       )`,
+      [idObra]
+    );
+    await client.query('DELETE FROM presentacion WHERE id_obra = $1', [idObra]);
+
+    const { rows } = await client.query(
+      'DELETE FROM obra WHERE id_obra = $1 RETURNING id_obra, titulo',
+      [idObra]
+    );
+    if (!rows[0]) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Obra no encontrada' });
+    }
+
+    await client.query('COMMIT');
+    res.json({
+      ok: true,
+      mensaje: `La obra "${rows[0].titulo}" fue eliminada permanentemente de la base de datos.`,
+      obra_eliminada: rows[0],
+    });
   } catch (e) {
+    await client.query('ROLLBACK');
     next(e);
+  } finally {
+    client.release();
   }
 });
 

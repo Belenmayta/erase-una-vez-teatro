@@ -496,5 +496,94 @@ router.post('/:id/anular', verificarToken, async (req, res, next) => {
   }
 });
 
+// 7. Módulo de Desbloqueo y Edición de Asientos (cuando el comprador vuelve a la selección de asientos)
+router.post('/desbloquear-reserva', verificarToken, async (req, res, next) => {
+  const { id_funcion: id_presentacion, id_venta } = req.body;
+
+  if (!id_presentacion && !id_venta) {
+    return res.status(400).json({ error: 'Debe especificar la función o la venta cuyos asientos desea desbloquear' });
+  }
+
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    // Buscar las ventas activas (PENDIENTE o PAGADA cuyos boletos no hayan sido escaneados/USADOS en puerta) del usuario en esta presentación
+    let ventasQuery = `
+      SELECT v.id_venta, v.id_usuario, v.id_presentacion, v.estado
+        FROM venta v
+       WHERE v.estado IN ('PENDIENTE', 'PAGADA')`;
+    const params = [];
+
+    if (id_venta) {
+      params.push(Number(id_venta));
+      ventasQuery += ` AND v.id_venta = $${params.length}`;
+    } else {
+      params.push(Number(id_presentacion));
+      ventasQuery += ` AND v.id_presentacion = $${params.length}`;
+    }
+
+    if (req.usuario.rol !== 'ADMINISTRADOR') {
+      params.push(req.usuario.id);
+      ventasQuery += ` AND v.id_usuario = $${params.length}`;
+    }
+
+    ventasQuery += ` ORDER BY v.fecha_venta DESC`;
+
+    const { rows: ventasRows } = await client.query(ventasQuery, params);
+    if (ventasRows.length === 0) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({
+        error: 'No tienes asientos bloqueados en esta función para desbloquear.',
+      });
+    }
+
+    // Tomar la venta más reciente del usuario en esa función (o la id_venta indicada)
+    const ventaTarget = ventasRows[0];
+
+    // Obtener los asientos que tenía bloqueados en esa venta (que no hayan sido USADOS en puerta)
+    const { rows: boletosRows } = await client.query(
+      `SELECT b.id_boleto, b.id_asiento, b.estado, a.fila, a.numero
+         FROM boleto b
+         JOIN asiento a ON a.id_asiento = b.id_asiento
+        WHERE b.id_venta = $1
+          AND b.estado <> 'ANULADO'
+        ORDER BY a.fila, a.numero`,
+      [ventaTarget.id_venta]
+    );
+
+    const yaUsados = boletosRows.filter((b) => b.estado === 'USADO');
+    if (yaUsados.length > 0) {
+      await client.query('ROLLBACK');
+      return res.status(400).json({
+        error: 'No se pueden desbloquear boletos que ya fueron validados en puerta.',
+      });
+    }
+
+    const asientosDesbloqueados = boletosRows.map((b) => b.id_asiento);
+    const etiquetasAsientos = boletosRows.map((b) => `${b.fila}${b.numero}`);
+
+    // Eliminar pagos, boletos y registro de venta para liberar completamente las butacas y no sobrecargar la BD
+    await client.query(`DELETE FROM pago WHERE id_venta = $1`, [ventaTarget.id_venta]);
+    await client.query(`DELETE FROM boleto WHERE id_venta = $1`, [ventaTarget.id_venta]);
+    await client.query(`DELETE FROM venta WHERE id_venta = $1`, [ventaTarget.id_venta]);
+
+    await client.query('COMMIT');
+
+    res.json({
+      ok: true,
+      id_venta_liberada: ventaTarget.id_venta,
+      asientos_desbloqueados: asientosDesbloqueados,
+      etiquetas: etiquetasAsientos,
+      mensaje: `Asientos (${etiquetasAsientos.join(', ')}) desbloqueados con éxito. Ya puedes quitar o agregar butacas y volver a confirmar tu pago.`,
+    });
+  } catch (err) {
+    await client.query('ROLLBACK');
+    next(err);
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
 module.exports.liberarReservasVencidas = liberarReservasVencidas;

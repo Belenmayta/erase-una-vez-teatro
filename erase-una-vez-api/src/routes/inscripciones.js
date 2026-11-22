@@ -370,4 +370,73 @@ router.patch('/:id/estado', requerirRol('ADMINISTRADOR', 'DOCENTE'), async (req,
   }
 });
 
+// 6. Módulo para Desinscribirse de un Taller (Comprador titular o Administrador)
+router.post('/:id/desinscribir', async (req, res, next) => {
+  const idInscripcion = Number(req.params.id);
+  const client = await db.pool.connect();
+  try {
+    await client.query('BEGIN');
+
+    const { rows: inscRows } = await client.query(
+      `SELECT i.*, e.id_usuario, e.nombres, e.apellidos, c.nombre AS curso_nombre
+         FROM inscripcion i
+         JOIN estudiante e ON e.id_estudiante = i.id_estudiante
+         JOIN curso c ON c.id_curso = i.id_curso
+        WHERE i.id_inscripcion = $1`,
+      [idInscripcion]
+    );
+
+    if (!inscRows[0]) {
+      await client.query('ROLLBACK');
+      return res.status(404).json({ error: 'Inscripción no encontrada' });
+    }
+    const insc = inscRows[0];
+
+    if (
+      !esAdminODocente(req.usuario.rol) &&
+      Number(insc.id_usuario) !== Number(req.usuario.id)
+    ) {
+      await client.query('ROLLBACK');
+      return res
+        .status(403)
+        .json({ error: 'No tiene permiso para dar de baja esta inscripción' });
+    }
+
+    // Eliminar cuotas pendientes que no hayan sido pagadas
+    await client.query(
+      `DELETE FROM pago_mensualidad
+        WHERE id_inscripcion = $1 AND estado = 'PENDIENTE'`,
+      [idInscripcion]
+    );
+
+    // Verificar si quedan cuotas pagadas para decidir si retirar o eliminar el registro
+    const { rows: pagadas } = await client.query(
+      `SELECT COUNT(*) FROM pago_mensualidad WHERE id_inscripcion = $1 AND estado = 'PAGADA'`,
+      [idInscripcion]
+    );
+
+    if (parseInt(pagadas[0].count, 10) > 0) {
+      await client.query(
+        `UPDATE inscripcion SET estado = 'RETIRADA' WHERE id_inscripcion = $1`,
+        [idInscripcion]
+      );
+    } else {
+      await client.query(`DELETE FROM inscripcion WHERE id_inscripcion = $1`, [
+        idInscripcion,
+      ]);
+    }
+
+    await client.query('COMMIT');
+    res.json({
+      ok: true,
+      mensaje: `Se ha dado de baja la inscripción de ${insc.nombres} ${insc.apellidos} en el taller "${insc.curso_nombre}" y se liberó el cupo.`,
+    });
+  } catch (e) {
+    await client.query('ROLLBACK');
+    next(e);
+  } finally {
+    client.release();
+  }
+});
+
 module.exports = router;
