@@ -6,34 +6,64 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', 'Poppins', 'Montserrat', 'Roboto', 'Open Sans', 'Lato', 'sans-serif'],
+        serif: ['Playfair Display', 'Lora', 'Merriweather', 'Libre Baskerville', 'Georgia', 'serif'],
+        theater: ['Playfair Display', 'Lora', 'Merriweather', 'Libre Baskerville', 'Georgia', 'serif'],
+        slab: ['Arvo', 'Playfair Display', 'serif'],
+        mono: ['JetBrains Mono', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+      },
       colors: {
-        // Morados místicos extraídos de las letras, el hada y la luna del logo
+        // Paleta oficial "Amethyst dawn haze": #341C67, #472F5B, #C4AEF4, #CCA4B4, #DCCE40
+        // Tonos suaves, armoniosos y no muy fuertes
+        slate: {
+          50: '#F8F6FC',
+          100: '#F1ECF9',
+          200: '#E3D9F4',
+          300: '#C4AEF4', // Lavanda suave (#C4AEF4)
+          400: '#CCA4B4', // Malva rosado suave (#CCA4B4)
+          500: '#9E85AD',
+          600: '#765D8A',
+          700: '#583E70',
+          800: '#472F5B', // Ciruela humo (#472F5B)
+          900: '#341C67', // Amatista profundo principal (#341C67)
+          950: '#25134B', // Amatista nocturno suave para barras y contrastes
+        },
         teatro: {
-          50: '#fcf5ff',
-          100: '#f7e6ff',
-          200: '#eed0ff',
-          300: '#e0aaff',
-          400: '#c770ff',
-          500: '#ac3aff',
-          600: '#8e1bdf',
-          700: '#7514b8', // Púrpura dominante de las letras
-          800: '#5c1291',
-          900: '#3e0a63',
-          950: '#1e0333', // Fondo morado muy oscuro
+          50: '#F7F4FD',
+          100: '#EDE7FB',
+          200: '#DBCFF8',
+          300: '#C4AEF4', // Lavanda suave (#C4AEF4)
+          400: '#CCA4B4', // Rosa malva (#CCA4B4)
+          500: '#9B7ED9',
+          600: '#6A4CA8',
+          700: '#472F5B', // Ciruela (#472F5B)
+          800: '#3D2462',
+          900: '#341C67', // Amatista (#341C67)
+          950: '#25134B',
         },
-        // Dorados/Bronce de la luna y el marco circular
+        // Acento dorado suave de la paleta (#DCCE40)
         oro: {
-          300: '#fde68a',
-          400: '#fbbf24', // Dorado brillante
-          500: '#d97706', // Bronce/Dorado oscuro
-          600: '#b45309',
+          200: '#F2EC9E',
+          300: '#E7DD6B',
+          400: '#DCCE40', // Dorado suave Amethyst dawn haze (#DCCE40)
+          500: '#C8BA34',
+          600: '#A59824',
+          700: '#7D721A',
+          950: '#382B47',
         },
-        // Verde esmeralda extraído de la pluma metálica
+        // Malva rosado de la paleta (#CCA4B4)
+        malva: {
+          300: '#DEC2CE',
+          400: '#CCA4B4',
+          500: '#B5899B',
+          600: '#8F6577',
+        },
         esmeralda: {
-          400: '#34d399',
-          500: '#10b981',
-          600: '#059669', // Verde pluma
-          700: '#047857',
+          400: '#6EE7B7',
+          500: '#34D399',
+          600: '#10B981',
+          700: '#059669',
         }
       }
     },

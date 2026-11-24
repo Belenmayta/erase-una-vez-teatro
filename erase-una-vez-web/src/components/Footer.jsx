@@ -8,11 +8,16 @@ export default function Footer({ alCambiarPagina }) {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Columna 1: Teatro */}
           <div className="md:col-span-2 space-y-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <Sparkles className="w-6 h-6 text-oro-400" />
-              <span className="text-xl font-bold font-theater text-white tracking-wide">
-                Érase una Vez
-              </span>
+              <div>
+                <span className="text-xl font-bold font-theater text-slate-100 uppercase tracking-wider block leading-none">
+                  ÉRASE UNA VEZ
+                </span>
+                <span className="text-xs text-oro-400 font-medium block mt-0.5">
+                  Compañía de Teatro • La Paz
+                </span>
+              </div>
             </div>
             <p className="text-slate-300 text-xs sm:text-sm leading-relaxed max-w-md">
               Compañía de teatro infantil y formación artística fundada en 2017 en la ciudad de La Paz.

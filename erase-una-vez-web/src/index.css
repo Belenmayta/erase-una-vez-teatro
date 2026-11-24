@@ -3,23 +3,40 @@
 @tailwind utilities;
 
 @layer base {
+  body {
+    font-family: 'Inter', 'Poppins', 'Montserrat', 'Roboto', 'Open Sans', 'Lato', sans-serif;
+    background-color: #341C67;
+    color: #F1ECF9;
+  }
+
   h1, h2, h3, .font-theater {
-    font-family: 'Playfair Display', Georgia, serif;
+    font-family: 'Playfair Display', 'Lora', 'Merriweather', 'Libre Baskerville', Georgia, serif;
+    color: #F1ECF9;
+  }
+
+  /* Slab serif (Arvo) y monoespaciadas para acentos y datos técnicos, todas del mismo tono suave y uniforme */
+  .font-slab,
+  .font-mono,
+  code,
+  pre,
+  .dato-tecnico {
+    font-family: 'Arvo', 'JetBrains Mono', monospace;
+    color: #C4AEF4;
   }
 }
 
-/* Scrollbar personalizado */
+/* Scrollbar personalizado con la paleta Amethyst dawn haze */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #0f172a;
+  background: #25134B;
 }
 ::-webkit-scrollbar-thumb {
-  background: #334155;
+  background: #472F5B;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #be123c;
+  background: #C4AEF4;
 }

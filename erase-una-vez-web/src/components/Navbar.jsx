@@ -40,10 +40,10 @@ export default function Navbar({ alAbrirLogin, paginaActual, alCambiarPagina }) 
               />
             </div>
             <div>
-              <span className="text-xl font-bold font-theater text-white tracking-wide block leading-none">
-                Érase una Vez
+              <span className="text-xl font-bold font-theater text-slate-100 uppercase tracking-wider block leading-none">
+                ÉRASE UNA VEZ
               </span>
-              <span className="text-[11px] text-oro-400 uppercase tracking-widest font-medium">
+              <span className="text-xs text-oro-400 tracking-wide font-medium font-sans mt-0.5 block">
                 Compañía de Teatro • La Paz
               </span>
             </div>

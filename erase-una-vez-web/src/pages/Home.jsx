@@ -34,27 +34,27 @@ export default function Home({ alCambiarPagina, alSeleccionarFuncion }) {
   return (
     <div className="space-y-16 pb-16">
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-12 pb-20 md:py-28 bg-gradient-to-b from-slate-950 via-teatro-950/40 to-slate-900 border-b border-slate-800">
-        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#e11d48_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
+      <section className="relative overflow-hidden pt-12 pb-20 md:py-28 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-800/90 border-b border-slate-800">
+        <div className="absolute inset-0 opacity-20 bg-[radial-gradient(#C4AEF4_1px,transparent_1px)] [background-size:24px_24px] pointer-events-none" />
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
             <div className="lg:col-span-7 space-y-6 text-center lg:text-left">
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-teatro-900/80 border border-teatro-700/60 text-teatro-200 text-xs font-semibold tracking-wide">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-slate-800/80 border border-teatro-300/30 text-teatro-300 text-xs font-slab tracking-wide">
                 <Sparkles className="w-3.5 h-3.5 text-oro-400" />
-                <span>Espacio Teatral Infantil y Juvenil en La Paz</span>
+                <span>Compañía de Teatro • La Paz</span>
               </div>
 
-              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-theater text-white tracking-tight leading-tight">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-theater text-slate-100 tracking-tight leading-tight">
                 Donde la imaginación y las emociones cobran{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-oro-400 via-oro-500 to-teatro-400">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-oro-400 via-teatro-300 to-malva-400">
                   vida sobre el escenario
                 </span>
               </h1>
 
-              <p className="text-base sm:text-lg text-slate-300 leading-relaxed max-w-2xl mx-auto lg:mx-0">
+              <p className="text-base sm:text-lg text-slate-200/90 leading-relaxed max-w-2xl mx-auto lg:mx-0">
                 Bienvenido a la plataforma web oficial de la{' '}
-                <strong className="text-white font-semibold">Compañía de Teatro “Érase una Vez”</strong>.
+                <strong className="text-slate-100 font-semibold">Compañía de Teatro “ÉRASE UNA VEZ”</strong>.
                 Descubre nuestra cartelera teatral, elige tus butacas preferidas, adquiere tus boletos digitales
                 con código QR al instante e inscríbete a nuestros talleres de teatroterapia.
               </p>
@@ -292,11 +292,17 @@ export default function Home({ alCambiarPagina, alSeleccionarFuncion }) {
               </div>
             </div>
 
-            <div className="rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 p-2 shadow-xl">
-              <img
-                src="https://images.unsplash.com/photo-1518834107812-67b0b7c58434?auto=format&fit=crop&w=800&q=80"
-                alt="Sopocachi La Paz"
-                className="w-full h-56 object-cover rounded-xl"
+            <div className="rounded-2xl overflow-hidden border border-teatro-300/30 bg-slate-950 p-2 shadow-xl h-64">
+              <iframe
+                title="Mapa Sede Sopocachi - Compañía de Teatro ÉRASE UNA VEZ"
+                src="https://www.google.com/maps?q=Calle+Agustin+Aspiazu+y+Av+20+de+Octubre,+Sopocachi,+La+Paz,+Bolivia&output=embed"
+                width="100%"
+                height="100%"
+                style={{ border: 0 }}
+                allowFullScreen=""
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                className="rounded-xl"
               />
             </div>
           </div>
