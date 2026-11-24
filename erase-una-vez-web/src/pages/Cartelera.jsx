@@ -16,6 +16,97 @@ import {
   Users,
 } from 'lucide-react';
 
+const ARCHIVO_HISTORICO_LOCAL = [
+  {
+    id_obra: 'hist-pasanaku',
+    titulo: 'Pasanaku',
+    descripcion:
+      'Comedia teatral costumbrista: “Estás invitada(o) a divertirte y brindar por nuestro nuevo espacio, muchas sorpresas”. Presentada el Viernes 24 de Mayo a Hrs. 19:00 en nuestra sede de Av. 20 de Octubre y Aspiazu, Edif. Aspiazu PB, galería local 5 al fondo (Adhesión Bs. 15 • Reservas: 61111084).',
+    duracion_min: 75,
+    publico_objetivo: 'Comedia Familiar y Adultos',
+    afiche_url: '/galeria/afiche-pasanaku.jpg',
+    sala_nombre: 'Sede Sopocachi — Edif. Aspiazu PB Local 5',
+    estado: 'Finalizada',
+  },
+  {
+    id_obra: 'hist-pequefest',
+    titulo: 'Peque Fest 2024',
+    descripcion:
+      'Festival infantil musical y teatral presentado el 13 y 14 de Abril de 2024 con la adaptación musical de La Sirenita (Ariel, Sebastián y Flounder), dinámicas participativas y números musicales para toda la familia (Referencias: 60646087 - 69995091).',
+    duracion_min: 90,
+    publico_objetivo: 'Infantil y Familiar',
+    afiche_url: '/galeria/afiche-peque-fest-2024.jpg',
+    sala_nombre: 'Escenario Principal Érase una Vez',
+    estado: 'Finalizada',
+  },
+  {
+    id_obra: 'hist-muestras',
+    titulo: 'Muestras de Teatro — Alumnos de Érase una Vez',
+    descripcion:
+      'Gala académica y demostrativa protagonizada por los alumnos formados en los talleres de actuación y teatroterapia de Érase una Vez. Presentada el Sábado 10 de Febrero a Hrs. 17:00 en el Teatro de Cámara (Informes: 69995091 • Facebook: Erase una Vez Bolivia).',
+    duracion_min: 90,
+    publico_objetivo: 'Gala Académica / Todo Público',
+    afiche_url: '/galeria/afiche-muestras-teatro-alumnos.jpg',
+    sala_nombre: 'Teatro de Cámara',
+    estado: 'Finalizada',
+  },
+  {
+    id_obra: 'hist-encanto',
+    titulo: 'Tributo Musical “Encanto”',
+    descripcion:
+      'Puesta en escena musical inspirada en la familia Madrigal (Mirabel, Isabela, Luisa y Bruno) con coreografías en vivo, vestuario colorido e interacción directa con niñas, niños y familias paceñas.',
+    duracion_min: 80,
+    publico_objetivo: 'Infantil y Familiar',
+    afiche_url: '/galeria/musical-encanto-familia.jpg',
+    sala_nombre: 'Escenario Abierto / Giras Culturales La Paz',
+    estado: 'Finalizada',
+  },
+  {
+    id_obra: 'hist-gala-municipal',
+    titulo: 'Gala Navideña y El Grinch en el Teatro Municipal',
+    descripcion:
+      'Gran montaje navideño con elenco completo, cuerpo de baile y personajes clásicos presentado a sala llena en el histórico Teatro Municipal Alberto Saavedra Pérez.',
+    duracion_min: 95,
+    publico_objetivo: 'Familiar',
+    afiche_url: '/galeria/gala-navidena-teatro-municipal.jpg',
+    sala_nombre: 'Teatro Municipal Alberto Saavedra Pérez',
+    estado: 'Finalizada',
+  },
+  {
+    id_obra: 'hist-jack',
+    titulo: 'El Extraño Mundo de Jack — Fantasía Musical',
+    descripcion:
+      'Montaje escénico y musical de fantasía con caracterización profesional, maquillaje artístico y participación conjunta del elenco oficial y estudiantes de la academia.',
+    duracion_min: 85,
+    publico_objetivo: 'Familiar y Juvenil',
+    afiche_url: '/galeria/elenco-extrano-mundo-jack.jpg',
+    sala_nombre: 'Teatro Municipal 6 de Agosto / Sopocachi',
+    estado: 'Finalizada',
+  },
+  {
+    id_obra: 'hist-patrulla',
+    titulo: 'Show Infantil: Patrulla Canina al Rescate',
+    descripcion:
+      'Obra infantil interactiva centrada en el trabajo en equipo, la solidaridad y el cuidado del entorno, diseñada especialmente para la primera infancia.',
+    duracion_min: 65,
+    publico_objetivo: 'Infantil',
+    afiche_url: '/galeria/show-patrulla-canina.jpg',
+    sala_nombre: 'Sala Principal Érase una Vez',
+    estado: 'Finalizada',
+  },
+  {
+    id_obra: 'hist-solidaria',
+    titulo: 'Obra y Acción Solidaria por Navidad',
+    descripcion:
+      'Intervención escénica comunitaria y jornada de teatroterapia llevando alegría, dinámicas grupales y regalos navideños a niñas y niños de barrios altos de La Paz.',
+    duracion_min: 90,
+    publico_objetivo: 'Acción Social y Comunitaria',
+    afiche_url: '/galeria/obra-solidaria-navidad.jpg',
+    sala_nombre: 'Barrios y Comunidades de La Paz',
+    estado: 'Finalizada',
+  },
+];
+
 export default function Cartelera({ alSeleccionarFuncion }) {
   const { usuario } = useAuth();
   const [funciones, setFunciones] = useState([]);
@@ -58,11 +149,18 @@ export default function Cartelera({ alSeleccionarFuncion }) {
         (o.publico_objetivo && o.publico_objetivo.toLowerCase().includes(busqueda.toLowerCase())))
   );
 
-  const obrasAntiguas = obras.filter(
+  const obrasAntiguasBase = [
+    ...obras.filter((o) => o.estado === 'Finalizada' || o.estado === 'INACTIVA'),
+    ...ARCHIVO_HISTORICO_LOCAL.filter(
+      (loc) => !obras.some((o) => o.titulo?.toLowerCase().trim() === loc.titulo.toLowerCase().trim())
+    ),
+  ];
+
+  const obrasAntiguas = obrasAntiguasBase.filter(
     (o) =>
-      (o.estado === 'Finalizada' || o.estado === 'INACTIVA') &&
-      (o.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
-        (o.publico_objetivo && o.publico_objetivo.toLowerCase().includes(busqueda.toLowerCase())))
+      o.titulo.toLowerCase().includes(busqueda.toLowerCase()) ||
+      (o.publico_objetivo && o.publico_objetivo.toLowerCase().includes(busqueda.toLowerCase())) ||
+      (o.descripcion && o.descripcion.toLowerCase().includes(busqueda.toLowerCase()))
   );
 
   const imagenPorDefecto =

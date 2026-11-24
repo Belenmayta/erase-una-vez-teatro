@@ -267,6 +267,59 @@ export default function Cursos({ alAbrirLogin, alIrAMisEstudiantes }) {
         </p>
       </div>
 
+      {/* Afiches Oficiales Destacados: Taller para Adultos Mayores y Campaña Psicológica Gratuita */}
+      <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-slate-900/90 border border-teatro-300/30 rounded-3xl overflow-hidden shadow-xl flex flex-col sm:flex-row">
+          <img
+            src="/galeria/afiche-taller-adultos-mayores.jpg"
+            alt="Taller para Adultos Mayores - Érase una Vez"
+            className="w-full sm:w-44 h-60 sm:h-auto object-cover bg-slate-950 shrink-0"
+          />
+          <div className="p-5 flex flex-col justify-between space-y-3">
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-slab text-oro-400">
+                ¡Pensamos en ellos también!
+              </span>
+              <h3 className="text-lg font-bold font-theater text-white">
+                Taller Especial para Adultos Mayores
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Incluye <strong>Zumba para la tercera edad</strong>, <strong>Teatro terapia</strong>, <strong>Canto</strong> y <strong>Danza</strong> en un ambiente cálido y seguro.
+              </p>
+            </div>
+            <div className="text-[11px] font-slab text-teatro-300 space-y-0.5 pt-2 border-t border-slate-800">
+              <div>📍 Aspiazu esq. 20 de Octubre, Edif. Aspiazu PB</div>
+              <div>📞 Informes y WhatsApp: <strong className="text-oro-400">69995091</strong></div>
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-slate-900/90 border border-teatro-300/30 rounded-3xl overflow-hidden shadow-xl flex flex-col sm:flex-row">
+          <img
+            src="/galeria/afiche-campana-psicologica.jpg"
+            alt="Gran campaña de evaluación psicológica gratuita - Érase una Vez"
+            className="w-full sm:w-44 h-60 sm:h-auto object-cover bg-slate-950 shrink-0"
+          />
+          <div className="p-5 flex flex-col justify-between space-y-3">
+            <div className="space-y-1.5">
+              <span className="text-[11px] font-slab text-oro-400">
+                Apoyo Psicológico y Teatroterapia
+              </span>
+              <h3 className="text-lg font-bold font-theater text-white">
+                Campaña de Evaluación Psicológica Gratuita
+              </h3>
+              <p className="text-xs text-slate-300 leading-relaxed">
+                Atención a <strong>Niños</strong> (conducta, bullying), <strong>Jóvenes y Adultos</strong> (ansiedad, estrés, anorexia, bulimia) y <strong>Adultos Mayores</strong> (depresión, Alzheimer, terapia ocupacional).
+              </p>
+            </div>
+            <div className="text-[11px] font-slab text-teatro-300 space-y-0.5 pt-2 border-t border-slate-800">
+              <div>📍 Aspiazu esq. 20 de Octubre, Edif. Aspiazu PB</div>
+              <div>📞 Solicita tu turno: <strong className="text-oro-400">69995091 - 60646087</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {notificacionGeneral && (
         <div className="max-w-4xl mx-auto p-4 bg-emerald-950/80 border border-emerald-600/80 text-emerald-200 text-sm rounded-2xl flex items-center gap-3">
           <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />

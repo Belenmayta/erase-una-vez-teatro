@@ -1,34 +1,84 @@
 import React, { useState } from 'react';
-import { Sparkles, Heart, MapPin, Calendar, Users, Award, BookOpen, Camera, Film, ExternalLink, Navigation } from 'lucide-react';
+import {
+  Sparkles,
+  Heart,
+  MapPin,
+  Calendar,
+  Users,
+  Award,
+  BookOpen,
+  Camera,
+  Film,
+  ExternalLink,
+  Navigation,
+  Phone,
+  Stethoscope,
+  Smile,
+} from 'lucide-react';
 
 const GALERIA_ELENCO = [
   {
     id: 1,
-    titulo: 'Elenco Oficial “ÉRASE UNA VEZ”',
-    subtitulo: 'Dirección General, actores, docentes y equipo creativo en La Paz',
+    titulo: 'Elenco Oficial “ÉRASE UNA VEZ” en el Teatro 16 de Julio',
+    subtitulo: 'Nuestro elenco y dirección junto al público paceño a sala llena en la puesta en escena de “No hay un cementerio para mí”',
     categoria: 'Elenco y Dirección',
-    imagen: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=900&q=80',
+    imagen: '/galeria/elenco-principal-16-de-julio.jpg',
   },
   {
     id: 2,
-    titulo: 'Talleres de Teatroterapia Infantil y Juvenil',
-    subtitulo: 'Sesiones formativas de expresión corporal, voz y confianza escénica en Sopocachi',
-    categoria: 'Academia y Talleres',
-    imagen: 'https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=900&q=80',
+    titulo: 'Gala Teatral en el Teatro Municipal Alberto Saavedra Pérez',
+    subtitulo: 'Puesta en escena musical y navideña con elenco completo y bailarines en el principal escenario de La Paz',
+    categoria: 'Grandes Escenarios',
+    imagen: '/galeria/gala-navidena-teatro-municipal.jpg',
   },
   {
     id: 3,
-    titulo: 'Puestas en Escena y Temporadas Teatrales',
-    subtitulo: 'Funciones con enfoque educativo, familiar y reserva de cupo social gratuito',
-    categoria: 'En Escena',
-    imagen: 'https://images.unsplash.com/photo-1503095396549-807759245b35?auto=format&fit=crop&w=900&q=80',
+    titulo: 'Tributo Musical “Encanto” al Aire Libre',
+    subtitulo: 'Presentación familiar interactiva junto a cientos de niñas, niños y familias paceñas',
+    categoria: 'Musical Familiar',
+    imagen: '/galeria/musical-encanto-familia.jpg',
   },
   {
     id: 4,
-    titulo: 'Culminación y Entrega de Certificados',
-    subtitulo: 'Muestras finales de nuestros estudiantes junto a las familias del teatro',
-    categoria: 'Muestras y Graduación',
-    imagen: 'https://images.unsplash.com/photo-1460723237483-7a6dc9d0b212?auto=format&fit=crop&w=900&q=80',
+    titulo: 'Comedia Teatral “Pasanaku” en Escena',
+    subtitulo: 'Puesta en escena de humor y costumbres paceñas en nuestro nuevo espacio cultural de Sopocachi',
+    categoria: 'Comedia Costumbrista',
+    imagen: '/galeria/pasanaku-escena.jpg',
+  },
+  {
+    id: 5,
+    titulo: 'Obra y Acción Solidaria por Navidad',
+    subtitulo: 'Llevando teatroterapia, juegos, regalos y alegría a niñas y niños de barrios altos de La Paz',
+    categoria: 'Acción Solidaria',
+    imagen: '/galeria/obra-solidaria-navidad.jpg',
+  },
+  {
+    id: 6,
+    titulo: 'Jornada de Teatro Solidario y Teatroterapia',
+    subtitulo: 'Dinámicas grupales de integración, confianza y expresión emocional con niñas, niños y jóvenes',
+    categoria: 'Teatroterapia',
+    imagen: '/galeria/obra-solidaria-patio.jpg',
+  },
+  {
+    id: 7,
+    titulo: 'Fantasía Escénica: El Extraño Mundo de Jack',
+    subtitulo: 'Caracterización, maquillaje artístico y montaje musical junto a alumnos y elenco oficial',
+    categoria: 'Montaje Musical',
+    imagen: '/galeria/elenco-extrano-mundo-jack.jpg',
+  },
+  {
+    id: 8,
+    titulo: 'Show Infantil: Patrulla Canina en Escena',
+    subtitulo: 'Espectáculo infantil con valores de trabajo en equipo, amistad y rescate para los más pequeños',
+    categoria: 'Teatro Infantil',
+    imagen: '/galeria/show-patrulla-canina.jpg',
+  },
+  {
+    id: 9,
+    titulo: 'Backstage y Dirección Artística',
+    subtitulo: 'Directora Lic. Jaqueline Díaz Aranda (Jacky) junto al elenco de actores antes de salir a escena',
+    categoria: 'Detrás de Escena',
+    imagen: '/galeria/elenco-backstage-jacky.jpg',
   },
 ];
 
@@ -36,29 +86,85 @@ const OBRAS_HISTORICAS_DESTACADAS = [
   {
     id: 1,
     titulo: 'No hay un cementerio para mí',
-    anio: '2025 - 2026',
-    teatro: 'Teatro de Cámara / Cine Teatro 6 de Agosto',
+    anio: 'Temporada 2026 • Más Vendida',
+    teatro: 'Cine Teatro 16 de Julio (613 entradas vendidas)',
     genero: 'Drama Contemporáneo',
-    resena: 'Obra dramática sobre la memoria, la identidad y las huellas imborrables del pasado.',
+    resena: 'Obra dramática sobre la memoria, la identidad y las huellas imborrables del pasado. Éxito de taquilla con 200 VIP, 403 Platea y 10 Mezzanine.',
     afiche: 'https://kzenzecmwosrtilajfkz.supabase.co/storage/v1/object/public/afiches/afiche-no-hay-un-cementerio-para-mi.jpg.jpg',
   },
   {
     id: 2,
-    titulo: 'La Caperucita Roja y el Bosque de los Valores',
-    anio: '2017 - 2019',
-    teatro: 'Espacio Interactivo Memoria y Futuro Pipiripi',
-    genero: 'Teatro Infantil y Títeres',
-    resena: 'Adaptación interactiva de cuentos clásicos enfocada en la prevención, el respeto y la unión familiar.',
-    afiche: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=800&q=80',
+    titulo: 'Show Huntrix',
+    anio: 'Mayo 2026 • Más Vendida',
+    teatro: 'Cine Teatro 16 de Julio (560 entradas vendidas)',
+    genero: 'Espectáculo Musical y Escénico',
+    resena: 'Gran producción musical presentada en mayo en el Teatro 16 de Julio con 200 entradas VIP, 347 Platea y 13 Mezzanine vendidas.',
+    afiche: '/galeria/elenco-principal-16-de-julio.jpg',
   },
   {
     id: 3,
-    titulo: 'Función Solidaria por la Niñez Paceña',
-    anio: '2021',
-    teatro: 'Cine Teatro Municipal 6 de Agosto',
-    genero: 'Gala Teatral Solidaria',
-    resena: 'Hito institucional a beneficio de niñas y niños con diagnóstico de cáncer, dando origen al Cupo Social Gratuito.',
-    afiche: 'https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=800&q=80',
+    titulo: 'Pasanaku',
+    anio: 'Viernes 24 de Mayo • Hrs. 19:00',
+    teatro: 'Sede Sopocachi — Edif. Aspiazu PB Local 5 (Adhesión Bs. 15)',
+    genero: 'Comedia Costumbrista',
+    resena: 'Divertida comedia teatral que retrata las anécdotas, secretos y enredos alrededor del tradicional juego del Pasanaku paceño.',
+    afiche: '/galeria/afiche-pasanaku.jpg',
+  },
+  {
+    id: 4,
+    titulo: 'Peque Fest 2024',
+    anio: '13 y 14 de Abril de 2024',
+    teatro: 'Festival Infantil • Érase una Vez',
+    genero: 'Festival Infantil y Musical (La Sirenita)',
+    resena: 'Festival dedicado a la niñez con adaptación musical de La Sirenita, juegos escénicos y personajes mágicos.',
+    afiche: '/galeria/afiche-peque-fest-2024.jpg',
+  },
+  {
+    id: 5,
+    titulo: 'Muestras de Teatro — Alumnos de Érase una Vez',
+    anio: 'Sábado 10 de Febrero • Hrs. 17:00',
+    teatro: 'Teatro de Cámara',
+    genero: 'Gala Académica y Formativa',
+    resena: 'Presentación oficial de los alumnos formados en nuestros talleres de actuación y teatroterapia en el Teatro de Cámara.',
+    afiche: '/galeria/afiche-muestras-teatro-alumnos.jpg',
+  },
+  {
+    id: 6,
+    titulo: 'Tributo Musical “Encanto” y Gala en el Teatro Municipal',
+    anio: 'Temporadas 2022 - 2025',
+    teatro: 'Teatro Municipal Alberto Saavedra Pérez y Espacios Abiertos',
+    genero: 'Musical Familiar',
+    resena: 'Montajes musicales de gran formato con coreografías, canto en vivo y mensajes sobre la unión familiar.',
+    afiche: '/galeria/musical-encanto-familia.jpg',
+  },
+];
+
+const PROGRAMAS_SOCIALES_Y_TALLERES = [
+  {
+    id: 1,
+    titulo: 'Taller Integral para Adultos Mayores',
+    lema: '¡Pensamos en ellos también!',
+    descripcion:
+      'Espacio formativo y recreativo especialmente diseñado para la tercera edad en nuestra sede de Sopocachi: Zumba para la tercera edad, Teatroterapia, Canto y Danza.',
+    actividades: ['Zumba para la tercera edad', 'Teatro terapia', 'Canto coral y expresivo', 'Danza e integración'],
+    direccion: 'Aspiazu esq. 20 de Octubre, Edificio Aspiazu, PB. La Paz, Bolivia',
+    contacto: 'WhatsApp / Cel: 69995091',
+    afiche: '/galeria/afiche-taller-adultos-mayores.jpg',
+  },
+  {
+    id: 2,
+    titulo: 'Gran Campaña de Evaluación Psicológica Gratuita',
+    lema: 'Salud Emocional y Teatroterapia para toda la Familia',
+    descripcion:
+      'Iniciativa social de ÉRASE UNA VEZ con atención profesional gratuita para niños, jóvenes, adultos y adultos mayores.',
+    actividades: [
+      'Niños: Problemas de conducta, prevención de bullying y habilidades sociales',
+      'Jóvenes y Adultos: Ansiedad, estrés, trastornos alimenticios (anorexia, bulimia) y prevención',
+      'Adultos Mayores: Depresión, acompañamiento en Alzheimer y terapia ocupacional',
+    ],
+    direccion: 'Aspiazu esq. 20 de Octubre, Edificio Aspiazu, PB. La Paz, Bolivia',
+    contacto: 'Turnos al 69995091 - 60646087 • Facebook: Érase una vez Bolivia',
+    afiche: '/galeria/afiche-campana-psicologica.jpg',
   },
 ];
 
@@ -81,40 +187,59 @@ export default function Nosotros() {
         </p>
         <p className="text-slate-200/90 text-sm sm:text-base leading-relaxed">
           Un espacio artístico y cultural nacido en la ciudad de La Paz con el propósito de acercar el arte dramático
-          a los niños, jóvenes y familias bolivianas mediante propuestas creativas, inclusivas y terapéuticas.
+          a los niños, jóvenes, adultos mayores y familias bolivianas mediante propuestas creativas, inclusivas y terapéuticas.
         </p>
       </div>
 
-      {/* Antecedentes e Historia */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-        <div className="space-y-4 text-xs sm:text-sm text-slate-200/90 leading-relaxed">
+      {/* Antecedentes e Historia con Foto Real del Elenco en el Teatro 16 de Julio */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+        <div className="lg:col-span-6 space-y-4 text-xs sm:text-sm text-slate-200/90 leading-relaxed">
           <span className="text-xs font-slab text-teatro-300 tracking-wider flex items-center gap-1.5">
             <Calendar className="w-4 h-4 text-oro-400" /> Trayectoria desde 2017
           </span>
           <h2 className="text-2xl sm:text-3xl font-bold font-theater text-slate-100">
-            Desde el Museo Pipiripi hasta los Grandes Escenarios
+            Desde el Museo Pipiripi hasta el Teatro 16 de Julio y Teatro Municipal
           </h2>
           <p>
-            El elenco teatral <strong className="text-slate-100">“ÉRASE UNA VEZ”</strong> nace en el año 2017 en la ciudad de La Paz. Sus primeras puestas en escena se desarrollaron en las instalaciones del emblemático <strong className="text-slate-100">Museo Pipiripi</strong>, presentando adaptaciones de cuentos clásicos y relatos tradicionales como <em>La Caperucita Roja</em>, consolidando una identidad artística basada en la imaginación, la enseñanza de valores y la conexión emocional con las familias.
+            El elenco teatral <strong className="text-slate-100">“ÉRASE UNA VEZ”</strong> nace en el año 2017 en la ciudad de La Paz bajo la dirección general de la <strong className="text-oro-400">Lic. Jaqueline Díaz Aranda</strong>. Sus primeras puestas en escena se desarrollaron en el emblemático <strong className="text-slate-100">Museo Pipiripi</strong>, presentando adaptaciones de cuentos clásicos como <em>La Caperucita Roja</em> y consolidando una identidad basada en la imaginación, la enseñanza de valores y la conexión emocional con las familias.
           </p>
           <p>
-            En el año 2021, el elenco dio un salto fundamental al presentarse en el <strong className="text-slate-100">Teatro Municipal 6 de Agosto</strong> con una función de carácter benéfico destinada a apoyar a niños en situación de vulnerabilidad y con diagnóstico de cáncer. Este hito consolidó la responsabilidad social como pilar permanente, estableciendo la política institucional de reservar en cada función un porcentaje de <strong className="text-oro-400">entradas 100% gratuitas</strong> para la niñez de sectores vulnerables.
+            A lo largo de su trayectoria, la compañía se ha presentado en los escenarios más importantes de La Paz —incluyendo el <strong className="text-slate-100">Cine Teatro 16 de Julio</strong>, el <strong className="text-slate-100">Teatro Municipal Alberto Saavedra Pérez</strong>, el <strong className="text-slate-100">Teatro Municipal 6 de Agosto</strong> y el <strong className="text-slate-100">Teatro de Cámara</strong>—, además de realizar obras solidarias en barrios paceños, campañas psicológicas gratuitas y talleres de <strong className="text-oro-400">Teatroterapia</strong> para niños, jóvenes y adultos mayores.
           </p>
+          <div className="grid grid-cols-3 gap-3 pt-2">
+            <div className="p-3 rounded-2xl bg-slate-800/80 border border-teatro-300/25 text-center">
+              <span className="text-xl font-bold font-theater text-oro-400 block">+15</span>
+              <span className="text-[11px] text-slate-200/80">Obras y Musicales</span>
+            </div>
+            <div className="p-3 rounded-2xl bg-slate-800/80 border border-teatro-300/25 text-center">
+              <span className="text-xl font-bold font-theater text-teatro-300 block">1.173+</span>
+              <span className="text-[11px] text-slate-200/80">Espectadores 2026</span>
+            </div>
+            <div className="p-3 rounded-2xl bg-slate-800/80 border border-teatro-300/25 text-center">
+              <span className="text-xl font-bold font-theater text-malva-400 block">100%</span>
+              <span className="text-[11px] text-slate-200/80">Compromiso Social</span>
+            </div>
+          </div>
         </div>
 
-        <div className="relative rounded-3xl overflow-hidden border border-teatro-300/30 shadow-2xl p-3 bg-slate-800/80">
-          <img
-            src="https://images.unsplash.com/photo-1507676184212-d03ab07a01bf?auto=format&fit=crop&w=900&q=80"
-            alt="Integrantes de la Compañía de Teatro ÉRASE UNA VEZ"
-            className="w-full h-80 object-cover rounded-2xl"
-          />
-          <div className="p-4 text-center space-y-1">
-            <span className="text-sm font-bold font-theater text-slate-100 block">
-              Elenco y Equipo Artístico — ÉRASE UNA VEZ
-            </span>
-            <span className="text-xs text-teatro-300 block">
-              Puestas en escena que integran juego dramático, títeres y teatroterapia en La Paz.
-            </span>
+        <div className="lg:col-span-6 space-y-4">
+          <div
+            onClick={() => setFotoActiva(GALERIA_ELENCO[0])}
+            className="cursor-pointer relative rounded-3xl overflow-hidden border border-teatro-300/35 shadow-2xl p-3 bg-slate-800/85 group"
+          >
+            <img
+              src="/galeria/elenco-principal-16-de-julio.jpg"
+              alt="Elenco de la Compañía de Teatro ÉRASE UNA VEZ en el Cine Teatro 16 de Julio"
+              className="w-full h-80 sm:h-96 object-cover rounded-2xl group-hover:scale-[1.02] transition-transform duration-500"
+            />
+            <div className="p-4 text-center space-y-1">
+              <span className="text-base font-bold font-theater text-slate-100 block">
+                Elenco Oficial “ÉRASE UNA VEZ” — Cine Teatro 16 de Julio
+              </span>
+              <span className="text-xs text-teatro-300 block">
+                Cierre a sala llena junto al público paceño (haz clic en la imagen para ampliar).
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -127,7 +252,7 @@ export default function Nosotros() {
           </div>
           <h3 className="text-2xl font-bold font-theater text-slate-100">Nuestra Misión</h3>
           <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed">
-            Contribuir al desarrollo integral de niñas, niños, adolescentes, jóvenes y familias a través del teatro y las diferentes expresiones artísticas, creando producciones que combinen entretenimiento, educación y concientización social.
+            Contribuir al desarrollo integral de niñas, niños, adolescentes, jóvenes, adultos mayores y familias a través del teatro y las diferentes expresiones artísticas, creando producciones que combinen entretenimiento, educación y concientización social.
           </p>
           <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed">
             Buscamos utilizar el arte como una herramienta de transformación, promoviendo valores, inclusión, desarrollo personal y reflexión sobre las diferentes problemáticas que atraviesa nuestra sociedad, garantizando espacios accesibles e inclusivos para toda la población.
@@ -148,30 +273,30 @@ export default function Nosotros() {
         </div>
       </div>
 
-      {/* Galería Fotográfica del Elenco y Momentos del Teatro */}
+      {/* Galería Fotográfica Real del Elenco y Momentos del Teatro */}
       <div className="space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-1">
             <span className="text-xs font-slab text-teatro-300 flex items-center gap-1.5">
-              <Camera className="w-4 h-4 text-oro-400" /> Memoria Visual del Teatro
+              <Camera className="w-4 h-4 text-oro-400" /> Memoria Visual del Teatro (Fotografías Reales)
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold font-theater text-slate-100">
-              Nuestro Elenco, Talleres y Momentos en Escena
+              Nuestro Elenco, Obras Solidarias y Momentos en Escena
             </h2>
           </div>
           <span className="text-xs font-slab text-teatro-300">
-            Compañía de Teatro • La Paz
+            Haz clic en cualquier fotografía para ampliarla
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {GALERIA_ELENCO.map((item) => (
             <div
               key={item.id}
               onClick={() => setFotoActiva(item)}
               className="group cursor-pointer bg-slate-800/75 border border-teatro-300/25 hover:border-oro-400/60 rounded-2xl overflow-hidden shadow-lg transition flex flex-col justify-between"
             >
-              <div className="relative h-52 overflow-hidden bg-slate-950">
+              <div className="relative h-60 overflow-hidden bg-slate-950">
                 <img
                   src={item.imagen}
                   alt={item.titulo}
@@ -194,12 +319,12 @@ export default function Nosotros() {
         </div>
       </div>
 
-      {/* Obras Históricas y Repertorio Anterior */}
+      {/* Obras Históricas y Afiches Oficiales */}
       <div className="bg-slate-800/60 border border-teatro-300/25 rounded-3xl p-8 sm:p-10 space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
           <div className="space-y-1">
             <span className="text-xs font-slab text-teatro-300 flex items-center gap-1.5">
-              <Film className="w-4 h-4 text-oro-400" /> Repertorio y Obras Anteriores
+              <Film className="w-4 h-4 text-oro-400" /> Repertorio, Afiches y Obras Anteriores
             </span>
             <h2 className="text-2xl sm:text-3xl font-bold font-theater text-slate-100">
               Obras Puestas en Escena por la Compañía
@@ -210,17 +335,25 @@ export default function Nosotros() {
           </span>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {OBRAS_HISTORICAS_DESTACADAS.map((obra) => (
             <div
               key={obra.id}
-              className="bg-slate-900/80 border border-teatro-300/20 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg"
+              onClick={() =>
+                setFotoActiva({
+                  titulo: obra.titulo,
+                  subtitulo: `${obra.resena} (${obra.teatro})`,
+                  categoria: obra.genero,
+                  imagen: obra.afiche,
+                })
+              }
+              className="cursor-pointer bg-slate-900/85 border border-teatro-300/20 hover:border-oro-400/50 rounded-2xl overflow-hidden flex flex-col justify-between shadow-lg transition group"
             >
-              <div className="relative h-48 overflow-hidden bg-slate-950">
+              <div className="relative h-64 overflow-hidden bg-slate-950">
                 <img
                   src={obra.afiche}
                   alt={obra.titulo}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
                 <span className="absolute bottom-3 right-3 px-2.5 py-1 rounded-lg bg-slate-900/90 border border-teatro-300/30 text-xs font-slab text-teatro-300">
                   {obra.anio}
@@ -231,7 +364,7 @@ export default function Nosotros() {
                   <span className="text-[11px] font-slab text-teatro-300">
                     {obra.genero}
                   </span>
-                  <h3 className="text-lg font-bold font-theater text-slate-100">
+                  <h3 className="text-lg font-bold font-theater text-slate-100 group-hover:text-oro-400 transition">
                     {obra.titulo}
                   </h3>
                   <p className="text-xs text-slate-200/80 leading-relaxed">
@@ -241,6 +374,75 @@ export default function Nosotros() {
                 <div className="pt-3 border-t border-slate-800 flex items-center gap-1.5 text-xs font-slab text-teatro-300">
                   <MapPin className="w-3.5 h-3.5 text-oro-400 shrink-0" />
                   <span>{obra.teatro}</span>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Programas de Impacto Social: Taller Adultos Mayores y Campaña Psicológica Gratuita */}
+      <div className="space-y-6">
+        <div className="space-y-1">
+          <span className="text-xs font-slab text-teatro-300 flex items-center gap-1.5">
+            <Stethoscope className="w-4 h-4 text-oro-400" /> Compromiso con la Salud Emocional y la Comunidad
+          </span>
+          <h2 className="text-2xl sm:text-3xl font-bold font-theater text-slate-100">
+            Talleres Especiales y Campañas de Evaluación Psicológica Gratuita
+          </h2>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {PROGRAMAS_SOCIALES_Y_TALLERES.map((prog) => (
+            <div
+              key={prog.id}
+              className="bg-slate-800/80 border border-teatro-300/30 rounded-3xl overflow-hidden shadow-xl grid grid-cols-1 sm:grid-cols-12"
+            >
+              <div
+                onClick={() =>
+                  setFotoActiva({
+                    titulo: prog.titulo,
+                    subtitulo: prog.descripcion,
+                    categoria: prog.lema,
+                    imagen: prog.afiche,
+                  })
+                }
+                className="sm:col-span-5 relative min-h-[260px] bg-slate-950 cursor-pointer group overflow-hidden"
+              >
+                <img
+                  src={prog.afiche}
+                  alt={prog.titulo}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <span className="absolute bottom-3 left-3 px-2.5 py-1 rounded-lg bg-slate-900/90 border border-teatro-300/30 text-[10px] font-slab text-oro-400">
+                  Clic para ampliar afiche
+                </span>
+              </div>
+
+              <div className="sm:col-span-7 p-6 flex flex-col justify-between space-y-4">
+                <div className="space-y-2">
+                  <span className="text-xs font-slab text-oro-400">{prog.lema}</span>
+                  <h3 className="text-xl font-bold font-theater text-slate-100">{prog.titulo}</h3>
+                  <p className="text-xs text-slate-200/85 leading-relaxed">{prog.descripcion}</p>
+                  <ul className="space-y-1 pt-2 text-xs text-slate-200/90">
+                    {prog.actividades.map((act, idx) => (
+                      <li key={idx} className="flex items-start gap-2">
+                        <Smile className="w-3.5 h-3.5 text-oro-400 shrink-0 mt-0.5" />
+                        <span>{act}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="pt-3 border-t border-slate-700/70 space-y-1 text-xs font-slab text-teatro-300">
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-oro-400 shrink-0" />
+                    <span>{prog.direccion}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Phone className="w-3.5 h-3.5 text-oro-400 shrink-0" />
+                    <span>{prog.contacto}</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -259,7 +461,7 @@ export default function Nosotros() {
           </h2>
         </div>
         <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed max-w-4xl">
-          La teatroterapia es una metodología interdisciplinaria desarrollada junto a docentes y terapeutas que aprovecha las herramientas de las artes dramáticas (la expresión corporal, la respiración, la modulación vocal, la improvisación y el juego simbólico) como un vehículo para fortalecer la autoestima, el autoconocimiento, la empatía y la gestión saludable de las emociones.
+          La teatroterapia es una metodología interdisciplinaria desarrollada junto a docentes y psicólogos terapeutas que aprovecha las herramientas de las artes dramáticas (la expresión corporal, la respiración, la modulación vocal, la improvisación y el juego simbólico) como un vehículo para fortalecer la autoestima, el autoconocimiento, la empatía y la gestión saludable de las emociones en niños, jóvenes, adultos y adultos mayores.
         </p>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2">
           <div className="p-4 bg-slate-900/75 rounded-2xl border border-teatro-300/20 text-xs space-y-1">
@@ -272,7 +474,7 @@ export default function Nosotros() {
           </div>
           <div className="p-4 bg-slate-900/75 rounded-2xl border border-teatro-300/20 text-xs space-y-1">
             <strong className="text-slate-100 block font-theater text-sm">Expresión Emocional</strong>
-            <p className="text-slate-200/80">Canalización positiva del estrés, frustración y creatividad mediante el arte.</p>
+            <p className="text-slate-200/80">Canalización positiva del estrés, ansiedad y creatividad mediante el arte escénico.</p>
           </div>
         </div>
       </div>
@@ -289,11 +491,13 @@ export default function Nosotros() {
               Nuestra Sala en Sopocachi
             </h3>
             <p className="text-xs sm:text-sm text-slate-200/90 leading-relaxed">
-              Visítanos en la zona de Sopocachi, <strong className="text-slate-100">Edificio Agustín Aspiazu (Planta Baja)</strong>, ubicado entre la calle Agustín Aspiazu y la Avenida 20 de Octubre en la ciudad de La Paz, Bolivia.
+              Visítanos en la zona de Sopocachi, <strong className="text-slate-100">Edificio Agustín Aspiazu (Planta Baja, galería local 5 al fondo)</strong>, ubicado en la intersección de la calle Agustín Aspiazu y la Avenida 20 de Octubre en la ciudad de La Paz, Bolivia.
             </p>
             <div className="p-4 rounded-2xl bg-slate-900/80 border border-teatro-300/20 space-y-1.5 text-xs">
-              <div className="font-slab text-teatro-300">Coordenadas y Referencia:</div>
-              <div className="text-slate-200/90">Calle Agustín Aspiazu esq. Av. 20 de Octubre, Zona Sopocachi (-16.5085, -68.1286)</div>
+              <div className="font-slab text-teatro-300">Dirección y Contactos Oficiales:</div>
+              <div className="text-slate-200/90">Av. 20 de Octubre esq. Agustín Aspiazu, Edif. Aspiazu PB, Sopocachi</div>
+              <div className="text-oro-400 font-slab">WhatsApp / Reservas: 69995091 • 60646087 • 61111084</div>
+              <div className="text-slate-300">Facebook: Érase una vez Bolivia</div>
             </div>
             <div className="pt-2">
               <a
@@ -324,21 +528,23 @@ export default function Nosotros() {
         </div>
       </div>
 
-      {/* Modal de vista ampliada de foto */}
+      {/* Modal de vista ampliada de foto o afiche */}
       {fotoActiva && (
         <div
           onClick={() => setFotoActiva(null)}
-          className="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4"
+          className="fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4"
         >
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-w-2xl w-full bg-slate-800 border border-teatro-300/40 rounded-3xl overflow-hidden shadow-2xl"
+            className="max-w-3xl w-full bg-slate-800 border border-teatro-300/40 rounded-3xl overflow-hidden shadow-2xl"
           >
-            <img
-              src={fotoActiva.imagen}
-              alt={fotoActiva.titulo}
-              className="w-full h-96 object-cover"
-            />
+            <div className="bg-slate-950 max-h-[70vh] flex items-center justify-center overflow-hidden">
+              <img
+                src={fotoActiva.imagen}
+                alt={fotoActiva.titulo}
+                className="max-h-[70vh] w-auto object-contain"
+              />
+            </div>
             <div className="p-6 flex items-center justify-between gap-4">
               <div>
                 <span className="text-xs font-slab text-teatro-300">{fotoActiva.categoria}</span>
@@ -347,7 +553,7 @@ export default function Nosotros() {
               </div>
               <button
                 onClick={() => setFotoActiva(null)}
-                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-700 text-slate-100 text-xs font-semibold border border-teatro-300/30"
+                className="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-700 text-slate-100 text-xs font-semibold border border-teatro-300/30 shrink-0"
               >
                 Cerrar
               </button>

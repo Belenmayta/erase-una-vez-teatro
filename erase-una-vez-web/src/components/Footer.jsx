@@ -83,16 +83,16 @@ export default function Footer({ alCambiarPagina }) {
               <div className="flex items-start gap-2">
                 <MapPin className="w-4 h-4 text-teatro-400 shrink-0 mt-0.5" />
                 <span>
-                  Edificio Agustín Aspiazu (Planta Baja), entre calle Aspiazu y Av. 20 de Octubre. Sopocachi, La Paz.
+                  Av. 20 de Octubre esq. Agustín Aspiazu, Edificio Aspiazu PB (galería local 5 al fondo). Sopocachi, La Paz.
                 </span>
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-4 h-4 text-teatro-400 shrink-0" />
-                <span>+591 70000000 / WhatsApp</span>
+                <span>+591 69995091 • 60646087 • 61111084</span>
               </div>
               <div className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-teatro-400 shrink-0" />
-                <span>contacto@eraseunavezteatro.bo</span>
+                <span>Facebook: Érase una vez Bolivia</span>
               </div>
             </div>
           </div>

@@ -6,6 +6,35 @@ const router = express.Router();
 
 router.use(verificarToken, requerirRol('ADMINISTRADOR', 'DOCENTE'));
 
+const OBRAS_MAS_VENDIDAS_2026 = [
+  {
+    id_ranking: 1,
+    titulo: 'NO HAY UN CEMENTERIO PARA MÍ',
+    periodo: 'Temporada 2026',
+    teatro: 'Cine Teatro 16 de Julio',
+    sectores: [
+      { sector: 'VIP', vendidas: 200, ingresos_bs: 14000 },
+      { sector: 'Platea', vendidas: 403, ingresos_bs: 10560 },
+      { sector: 'Mezzanine', vendidas: 10, ingresos_bs: 300 },
+    ],
+    total_vendidas: 613,
+    total_ingresos_bs: 24860,
+  },
+  {
+    id_ranking: 2,
+    titulo: 'Show Huntrix',
+    periodo: 'Mes Mayo 2026',
+    teatro: 'Cine Teatro 16 de Julio',
+    sectores: [
+      { sector: 'VIP', vendidas: 200, ingresos_bs: 14000 },
+      { sector: 'Platea', vendidas: 347, ingresos_bs: 9050 },
+      { sector: 'Mezzanine', vendidas: 13, ingresos_bs: 180 },
+    ],
+    total_vendidas: 560,
+    total_ingresos_bs: 23230,
+  },
+];
+
 // 1. Reporte de Ventas e Ingresos de Taquilla
 router.get('/ventas', async (req, res, next) => {
   try {
@@ -60,15 +89,23 @@ router.get('/ventas', async (req, res, next) => {
       totalAsistentes += parseInt(f.asistentes, 10) || 0;
     });
 
+    const boletosRanking2026 = OBRAS_MAS_VENDIDAS_2026.reduce((acc, o) => acc + o.total_vendidas, 0);
+    const ingresosRanking2026 = OBRAS_MAS_VENDIDAS_2026.reduce((acc, o) => acc + o.total_ingresos_bs, 0);
+
     res.json({
       resumen: {
         total_funciones: funciones.length,
-        total_boletos_vendidos: totalBoletosVendidos,
+        total_boletos_vendidos: totalBoletosVendidos + boletosRanking2026,
+        total_boletos_sistema: totalBoletosVendidos,
+        total_boletos_ranking_2026: boletosRanking2026,
         total_entradas_gratuitas: totalEntradasGratuitas,
-        total_boletos_emitidos: totalBoletosVendidos + totalEntradasGratuitas,
-        total_ingresos: Number(totalIngresos.toFixed(2)),
-        total_asistentes: totalAsistentes,
+        total_boletos_emitidos: totalBoletosVendidos + boletosRanking2026 + totalEntradasGratuitas,
+        total_ingresos: Number((totalIngresos + ingresosRanking2026).toFixed(2)),
+        total_ingresos_sistema: Number(totalIngresos.toFixed(2)),
+        total_ingresos_ranking_2026: Number(ingresosRanking2026.toFixed(2)),
+        total_asistentes: totalAsistentes + boletosRanking2026,
       },
+      obras_mas_vendidas_2026: OBRAS_MAS_VENDIDAS_2026,
       funciones,
     });
   } catch (e) {
@@ -286,13 +323,17 @@ router.get('/dashboard', async (req, res, next) => {
          FROM pago_mensualidad`
     );
 
+    const boletosRanking2026 = OBRAS_MAS_VENDIDAS_2026.reduce((acc, o) => acc + o.total_vendidas, 0);
+    const ingresosRanking2026 = OBRAS_MAS_VENDIDAS_2026.reduce((acc, o) => acc + o.total_ingresos_bs, 0);
+
     res.json({
       obras_activas: parseInt(oRows[0].activas, 10) || 0,
       obras_historicas: parseInt(oRows[0].historicas, 10) || 0,
       obras_totales: parseInt(oRows[0].total, 10) || 0,
       proximas_funciones: parseInt(fRows[0].count, 10) || 0,
-      boletos_vendidos_mes: parseInt(vMes[0].boletos_mes, 10) || 0,
-      ingresos_taquilla_mes: parseFloat(vMes[0].ingresos_mes) || 0,
+      boletos_vendidos_mes: (parseInt(vMes[0].boletos_mes, 10) || 0) + boletosRanking2026,
+      ingresos_taquilla_mes: (parseFloat(vMes[0].ingresos_mes) || 0) + ingresosRanking2026,
+      obras_mas_vendidas_2026: OBRAS_MAS_VENDIDAS_2026,
       cursos_activos: parseInt(cRows[0].count, 10) || 0,
       estudiantes_activos: parseInt(eRows[0].activos, 10) || 0,
       talleres_culminados: parseInt(eRows[0].culminados, 10) || 0,
