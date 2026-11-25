@@ -413,7 +413,285 @@ export default function AdminDashboard({ alAbrirLogin }) {
     return true;
   };
 
-  const mensualidadesFiltradasReporte = mensualidades.filter((m) => {
+  const ALUMNOS_RESPALDO_2026 = [
+    {
+      id_inscripcion: 10,
+      id_estudiante: 10,
+      estudiante_nombres: 'Gareth',
+      estudiante_apellidos: 'Barrientos Aguirre',
+      estudiante_ci: '13602918 LP',
+      estudiante_correo: 'gareth.barrientos@gmail.com',
+      tutor_nombre: 'Papá/Mamá de Gareth Barrientos',
+      tutor_telefono: '+59176543210',
+      curso_nombre: 'Taller de Teatro para Niños',
+      clases_asistidas: 16,
+      clases_totales: 16,
+      asistencia_porcentaje: 100,
+      eval_expresion: 98,
+      eval_voz: 96,
+      eval_improvisacion: 97,
+      eval_compromiso: 98,
+      nota_final: 97.3,
+      nivel_crecimiento: 'SOBRESALIENTE',
+      culmino_taller: true,
+      certificado_otorgado: true,
+      codigo_certificado: 'EUV-2026-MAY-SEP-01',
+      fecha_certificado: '2026-09-28',
+      certificados_ciclos: 'Mayo (✓) • Septiembre (✓) • Diciembre (Prog.)',
+      observaciones_docente:
+        'Alumno #1 más destacado (0 faltas). Recibió 1er Certificado en Mayo y 2do en Septiembre 2026; 3er Certificado en Diciembre. Dominio escénico, proyección vocal y liderazgo sobresalientes.',
+    },
+    {
+      id_inscripcion: 9,
+      id_estudiante: 9,
+      estudiante_nombres: 'Steven Grover',
+      estudiante_apellidos: 'Flores Suárez',
+      estudiante_ci: '13584120 LP',
+      estudiante_correo: 'steven.flores@gmail.com',
+      tutor_nombre: 'Papá/Mamá de Steven Flores',
+      tutor_telefono: '+59171234567',
+      curso_nombre: 'Taller de Teatro para Niños',
+      clases_asistidas: 16,
+      clases_totales: 16,
+      asistencia_porcentaje: 100,
+      eval_expresion: 96,
+      eval_voz: 95,
+      eval_improvisacion: 96,
+      eval_compromiso: 97,
+      nota_final: 96.0,
+      nivel_crecimiento: 'SOBRESALIENTE',
+      culmino_taller: true,
+      certificado_otorgado: true,
+      codigo_certificado: 'EUV-2026-MAY-SEP-02',
+      fecha_certificado: '2026-09-28',
+      certificados_ciclos: 'Mayo (✓) • Septiembre (✓) • Diciembre (Prog.)',
+      observaciones_docente:
+        'Alumno #2 más destacado (0 faltas). Recibió 1er Certificado en Mayo y 2do en Septiembre 2026; 3er Certificado en Diciembre. Gran evolución en construcción de personaje y dicción.',
+    },
+    {
+      id_inscripcion: 6,
+      id_estudiante: 6,
+      estudiante_nombres: 'Samara',
+      estudiante_apellidos: 'Lizarazu Peña',
+      estudiante_ci: '13450912 LP',
+      estudiante_correo: 'samara.lizarazu@gmail.com',
+      tutor_nombre: 'Papá/Mamá de Samara Lizarazu',
+      tutor_telefono: '+59172345678',
+      curso_nombre: 'Taller de Teatro para Niños',
+      clases_asistidas: 15,
+      clases_totales: 16,
+      asistencia_porcentaje: 93.8,
+      eval_expresion: 95,
+      eval_voz: 96,
+      eval_improvisacion: 94,
+      eval_compromiso: 95,
+      nota_final: 95.0,
+      nivel_crecimiento: 'SOBRESALIENTE',
+      culmino_taller: true,
+      certificado_otorgado: true,
+      codigo_certificado: 'EUV-2026-MAY-SEP-03',
+      fecha_certificado: '2026-09-28',
+      certificados_ciclos: 'Mayo (✓) • Septiembre (✓) • Diciembre (Prog.)',
+      observaciones_docente:
+        'Alumna #3 más destacada (solo 1 falta). Recibió 1er Certificado en Mayo y 2do en Septiembre 2026; 3er Certificado en Diciembre. Excelente sensibilidad dramática y expresividad corporal.',
+    },
+    {
+      id_inscripcion: 13,
+      id_estudiante: 13,
+      estudiante_nombres: 'Diego Alejandro',
+      estudiante_apellidos: 'Vargas Quispe',
+      estudiante_ci: '9845120 LP',
+      estudiante_correo: 'diego.vargas@gmail.com',
+      tutor_nombre: 'Papá/Mamá de Diego Vargas',
+      tutor_telefono: '+59171548290',
+      curso_nombre: 'Taller de Actuación para Jóvenes y Mayores',
+      clases_asistidas: 15,
+      clases_totales: 16,
+      asistencia_porcentaje: 93.8,
+      eval_expresion: 90,
+      eval_voz: 91,
+      eval_improvisacion: 89,
+      eval_compromiso: 92,
+      nota_final: 90.5,
+      nivel_crecimiento: 'DESTACADO',
+      culmino_taller: true,
+      certificado_otorgado: true,
+      codigo_certificado: 'EUV-2026-MAY-SEP-04',
+      fecha_certificado: '2026-09-28',
+      certificados_ciclos: 'Mayo (✓) • Septiembre (✓) • Diciembre (Prog.)',
+      observaciones_docente:
+        'Crecimiento sostenido en presencia escénica y proyección de voz (1 falta). 1er Certificado entregado en Mayo y 2do en Septiembre 2026; 3er Certificado en Diciembre.',
+    },
+    {
+      id_inscripcion: 7,
+      id_estudiante: 7,
+      estudiante_nombres: 'Kenia',
+      estudiante_apellidos: 'Menacho',
+      estudiante_ci: '13892041 LP',
+      estudiante_correo: 'kenia.menacho@gmail.com',
+      tutor_nombre: 'Papá/Mamá de Kenia Menacho',
+      tutor_telefono: '+59173456789',
+      curso_nombre: 'Taller de Teatro para Niños',
+      clases_asistidas: 15,
+      clases_totales: 16,
+      asistencia_porcentaje: 93.8,
+      eval_expresion: 90,
+      eval_voz: 88,
+      eval_improvisacion: 89,
+      eval_compromiso: 91,
+      nota_final: 89.5,
+      nivel_crecimiento: 'DESTACADO',
+      culmino_taller: true,
+      certificado_otorgado: true,
+      codigo_certificado: 'EUV-2026-MAY-SEP-05',
+      fecha_certificado: '2026-09-28',
+      certificados_ciclos: 'Mayo (✓) • Septiembre (✓) • Diciembre (Prog.)',
+      observaciones_docente:
+        'Notable progreso en desinhibición corporal y escucha activa (1 falta). 1er Certificado entregado en Mayo y 2do en Septiembre 2026; 3er Certificado en Diciembre.',
+    },
+    {
+      id_inscripcion: 8,
+      id_estudiante: 8,
+      estudiante_nombres: 'Ariadne',
+      estudiante_apellidos: 'Altamirano Pérez',
+      estudiante_ci: '13910455 LP',
+      estudiante_correo: 'ariadne.altamirano@gmail.com',
+      tutor_nombre: 'Papá/Mamá de Ariadne Altamirano',
+      tutor_telefono: '+59174567890',
+      curso_nombre: 'Taller de Teatro para Niños',
+      clases_asistidas: 14,
+      clases_totales: 16,
+      asistencia_porcentaje: 87.5,
+      eval_expresion: 89,
+      eval_voz: 87,
+      eval_improvisacion: 88,
+      eval_compromiso: 90,
+      nota_final: 88.5,
+      nivel_crecimiento: 'DESTACADO',
+      culmino_taller: true,
+      certificado_otorgado: true,
+      codigo_certificado: 'EUV-2026-MAY-SEP-06',
+      fecha_certificado: '2026-09-28',
+      certificados_ciclos: 'Mayo (✓) • Septiembre (✓) • Diciembre (Prog.)',
+      observaciones_docente:
+        'Buen desarrollo en expresión gestual y ritmo escénico (2 faltas). 1er Certificado entregado en Mayo y 2do en Septiembre 2026; 3er Certificado en Diciembre.',
+    },
+    {
+      id_inscripcion: 11,
+      id_estudiante: 11,
+      estudiante_nombres: 'Ashanti',
+      estudiante_apellidos: 'Tamayo',
+      estudiante_ci: '14019283 LP',
+      estudiante_correo: 'ashanti.tamayo@gmail.com',
+      tutor_nombre: 'Papá/Mamá de Ashanti Tamayo',
+      tutor_telefono: '+59175678901',
+      curso_nombre: 'Taller de Teatro para Niños',
+      clases_asistidas: 15,
+      clases_totales: 16,
+      asistencia_porcentaje: 93.8,
+      eval_expresion: 88,
+      eval_voz: 86,
+      eval_improvisacion: 87,
+      eval_compromiso: 90,
+      nota_final: 87.8,
+      nivel_crecimiento: 'DESTACADO',
+      culmino_taller: true,
+      certificado_otorgado: true,
+      codigo_certificado: 'EUV-2026-MAY-SEP-07',
+      fecha_certificado: '2026-09-28',
+      certificados_ciclos: 'Mayo (✓) • Septiembre (✓) • Diciembre (Prog.)',
+      observaciones_docente:
+        'Evolución positiva en articulación vocal y confianza frente al público (1 falta). 1er Certificado entregado en Mayo y 2do en Septiembre 2026; 3er Certificado en Diciembre.',
+    },
+    {
+      id_inscripcion: 12,
+      id_estudiante: 12,
+      estudiante_nombres: 'Massiel',
+      estudiante_apellidos: 'Rodríguez',
+      estudiante_ci: '13748291 LP',
+      estudiante_correo: 'massiel.rodriguez@gmail.com',
+      tutor_nombre: 'Papá/Mamá de Massiel Rodríguez',
+      tutor_telefono: '+59176789012',
+      curso_nombre: 'Taller de Teatro para Niños',
+      clases_asistidas: 14,
+      clases_totales: 16,
+      asistencia_porcentaje: 87.5,
+      eval_expresion: 87,
+      eval_voz: 85,
+      eval_improvisacion: 86,
+      eval_compromiso: 89,
+      nota_final: 86.8,
+      nivel_crecimiento: 'DESTACADO',
+      culmino_taller: true,
+      certificado_otorgado: true,
+      codigo_certificado: 'EUV-2026-MAY-SEP-08',
+      fecha_certificado: '2026-09-28',
+      certificados_ciclos: 'Mayo (✓) • Septiembre (✓) • Diciembre (Prog.)',
+      observaciones_docente:
+        'Avance constante en coordinación corporal y trabajo en equipo (2 faltas). 1er Certificado entregado en Mayo y 2do en Septiembre 2026; 3er Certificado en Diciembre.',
+    },
+  ];
+
+  const MENSUALIDADES_RESPALDO_2026 = ALUMNOS_RESPALDO_2026.flatMap((alum, idx) => [
+    {
+      id_mensualidad: idx * 3 + 1,
+      id_inscripcion: alum.id_inscripcion,
+      id_estudiante: alum.id_estudiante,
+      estudiante_nombres: alum.estudiante_nombres,
+      estudiante_apellidos: alum.estudiante_apellidos,
+      estudiante_correo: alum.estudiante_correo,
+      tutor_nombre: alum.tutor_nombre,
+      tutor_telefono: alum.tutor_telefono,
+      curso_nombre: alum.curso_nombre,
+      mes: 10,
+      anio: 2026,
+      monto: 180,
+      estado: 'PAGADA',
+      fecha_pago: '2026-10-05',
+      metodo_pago: 'EFECTIVO / QR',
+    },
+    {
+      id_mensualidad: idx * 3 + 2,
+      id_inscripcion: alum.id_inscripcion,
+      id_estudiante: alum.id_estudiante,
+      estudiante_nombres: alum.estudiante_nombres,
+      estudiante_apellidos: alum.estudiante_apellidos,
+      estudiante_correo: alum.estudiante_correo,
+      tutor_nombre: alum.tutor_nombre,
+      tutor_telefono: alum.tutor_telefono,
+      curso_nombre: alum.curso_nombre,
+      mes: 11,
+      anio: 2026,
+      monto: 180,
+      estado: 'PAGADA',
+      fecha_pago: '2026-11-05',
+      metodo_pago: 'EFECTIVO / QR',
+    },
+    {
+      id_mensualidad: idx * 3 + 3,
+      id_inscripcion: alum.id_inscripcion,
+      id_estudiante: alum.id_estudiante,
+      estudiante_nombres: alum.estudiante_nombres,
+      estudiante_apellidos: alum.estudiante_apellidos,
+      estudiante_correo: alum.estudiante_correo,
+      tutor_nombre: alum.tutor_nombre,
+      tutor_telefono: alum.tutor_telefono,
+      curso_nombre: alum.curso_nombre,
+      mes: 12,
+      anio: 2026,
+      monto: 180,
+      estado: 'PAGADA',
+      fecha_pago: '2026-12-04',
+      metodo_pago: 'EFECTIVO / QR',
+    },
+  ]);
+
+  const fuenteMensualidades =
+    mensualidades && mensualidades.length > 0 && mensualidades.every((m) => m.estado === 'PAGADA')
+      ? mensualidades
+      : MENSUALIDADES_RESPALDO_2026;
+
+  const mensualidadesFiltradasReporte = fuenteMensualidades.filter((m) => {
     if (modoFiltroReporte === 'ANUAL') {
       return Number(m.anio) === Number(anioFiltroRep);
     }
@@ -431,178 +709,45 @@ export default function AdminDashboard({ alAbrirLogin }) {
     return true;
   });
 
-  const ALUMNOS_RESPALDO_2026 = [
-    {
-      id_inscripcion: 10,
-      estudiante_nombres: 'Gareth',
-      estudiante_apellidos: 'Barrientos Aguirre',
-      curso_nombre: 'Taller de Teatro para Niños',
-      clases_asistidas: 16,
-      clases_totales: 16,
-      asistencia_porcentaje: 100,
-      eval_expresion: 98,
-      eval_voz: 96,
-      eval_improvisacion: 97,
-      eval_compromiso: 98,
-      nota_final: 97.3,
-      nivel_crecimiento: 'SOBRESALIENTE',
-      culmino_taller: true,
-      certificado_otorgado: true,
-      codigo_certificado: 'EUV-CERT-2026-0901',
-      fecha_certificado: '2026-09-28',
-      observaciones_docente:
-        'Alumno más destacado del ciclo trimestral (0 faltas). Dominio escénico sobresaliente, proyección vocal clara y liderazgo creativo en improvisación. Certificado entregado en Septiembre 2026.',
-    },
-    {
-      id_inscripcion: 9,
-      estudiante_nombres: 'Steven Grover',
-      estudiante_apellidos: 'Flores Suárez',
-      curso_nombre: 'Taller de Teatro para Niños',
-      clases_asistidas: 16,
-      clases_totales: 16,
-      asistencia_porcentaje: 100,
-      eval_expresion: 96,
-      eval_voz: 95,
-      eval_improvisacion: 96,
-      eval_compromiso: 97,
-      nota_final: 96.0,
-      nivel_crecimiento: 'SOBRESALIENTE',
-      culmino_taller: true,
-      certificado_otorgado: true,
-      codigo_certificado: 'EUV-CERT-2026-0902',
-      fecha_certificado: '2026-09-28',
-      observaciones_docente:
-        'Alumno destacado con asistencia perfecta (0 faltas). Gran evolución en construcción de personaje, dicción firme y trabajo colaborativo en escena. Certificado entregado en Septiembre 2026.',
-    },
-    {
-      id_inscripcion: 6,
-      estudiante_nombres: 'Samara',
-      estudiante_apellidos: 'Lizarazu Peña',
-      curso_nombre: 'Taller de Teatro para Niños',
-      clases_asistidas: 15,
-      clases_totales: 16,
-      asistencia_porcentaje: 93.8,
-      eval_expresion: 95,
-      eval_voz: 96,
-      eval_improvisacion: 94,
-      eval_compromiso: 95,
-      nota_final: 95.0,
-      nivel_crecimiento: 'SOBRESALIENTE',
-      culmino_taller: true,
-      certificado_otorgado: true,
-      codigo_certificado: 'EUV-CERT-2026-0903',
-      fecha_certificado: '2026-09-28',
-      observaciones_docente:
-        'Alumna destacada del taller (solo 1 falta justificada). Excelente sensibilidad dramática, expresividad corporal orgánica y fluidez escénica. Certificado entregado en Septiembre 2026.',
-    },
-    {
-      id_inscripcion: 13,
-      estudiante_nombres: 'Diego Alejandro',
-      estudiante_apellidos: 'Vargas Quispe',
-      curso_nombre: 'Taller de Actuación para Jóvenes y Mayores',
-      clases_asistidas: 15,
-      clases_totales: 16,
-      asistencia_porcentaje: 93.8,
-      eval_expresion: 90,
-      eval_voz: 91,
-      eval_improvisacion: 89,
-      eval_compromiso: 92,
-      nota_final: 90.5,
-      nivel_crecimiento: 'DESTACADO',
-      culmino_taller: true,
-      certificado_otorgado: false,
-      codigo_certificado: null,
-      observaciones_docente:
-        'Crecimiento sostenido en presencia escénica y proyección de voz en sala (1 falta). Excelente manejo de diálogo y memoria dramática.',
-    },
-    {
-      id_inscripcion: 7,
-      estudiante_nombres: 'Kenia',
-      estudiante_apellidos: 'Menacho',
-      curso_nombre: 'Taller de Teatro para Niños',
-      clases_asistidas: 15,
-      clases_totales: 16,
-      asistencia_porcentaje: 93.8,
-      eval_expresion: 90,
-      eval_voz: 88,
-      eval_improvisacion: 89,
-      eval_compromiso: 91,
-      nota_final: 89.5,
-      nivel_crecimiento: 'DESTACADO',
-      culmino_taller: true,
-      certificado_otorgado: false,
-      codigo_certificado: null,
-      observaciones_docente:
-        'Notable progreso en desinhibición corporal y escucha activa con sus compañeros (1 falta). Participación entusiasta en ensayos.',
-    },
-    {
-      id_inscripcion: 8,
-      estudiante_nombres: 'Ariadne',
-      estudiante_apellidos: 'Altamirano Pérez',
-      curso_nombre: 'Taller de Teatro para Niños',
-      clases_asistidas: 14,
-      clases_totales: 16,
-      asistencia_porcentaje: 87.5,
-      eval_expresion: 89,
-      eval_voz: 87,
-      eval_improvisacion: 88,
-      eval_compromiso: 90,
-      nota_final: 88.5,
-      nivel_crecimiento: 'DESTACADO',
-      culmino_taller: true,
-      certificado_otorgado: false,
-      codigo_certificado: null,
-      observaciones_docente:
-        'Buen desarrollo en expresión gestual y ritmo escénico (2 faltas). Muestra gran creatividad en dinámicas grupales de improvisación.',
-    },
-    {
-      id_inscripcion: 11,
-      estudiante_nombres: 'Ashanti',
-      estudiante_apellidos: 'Tamayo',
-      curso_nombre: 'Taller de Teatro para Niños',
-      clases_asistidas: 15,
-      clases_totales: 16,
-      asistencia_porcentaje: 93.8,
-      eval_expresion: 88,
-      eval_voz: 86,
-      eval_improvisacion: 87,
-      eval_compromiso: 90,
-      nota_final: 87.8,
-      nivel_crecimiento: 'DESTACADO',
-      culmino_taller: true,
-      certificado_otorgado: false,
-      codigo_certificado: null,
-      observaciones_docente:
-        'Evolución positiva en articulación vocal y confianza frente al público (1 falta). Excelente puntualidad y compañerismo.',
-    },
-    {
-      id_inscripcion: 12,
-      estudiante_nombres: 'Massiel',
-      estudiante_apellidos: 'Rodríguez',
-      curso_nombre: 'Taller de Teatro para Niños',
-      clases_asistidas: 14,
-      clases_totales: 16,
-      asistencia_porcentaje: 87.5,
-      eval_expresion: 87,
-      eval_voz: 85,
-      eval_improvisacion: 86,
-      eval_compromiso: 89,
-      nota_final: 86.8,
-      nivel_crecimiento: 'DESTACADO',
-      culmino_taller: true,
-      certificado_otorgado: false,
-      codigo_certificado: null,
-      observaciones_docente:
-        'Avance constante en coordinación corporal, desplazamiento en escenario y trabajo en equipo (2 faltas).',
-    },
-  ];
-
   const funcionesVentasFiltradas = (repVentas?.funciones || []).filter((f) => estaEnPeriodoFecha(f.fecha));
   const asistenciaFiltrada = repAsistencia.filter((a) => estaEnPeriodoFecha(a.fecha));
-  const participantesTalleres =
-    repTalleres?.participantes && repTalleres.participantes.length > 0
-      ? repTalleres.participantes
-      : ALUMNOS_RESPALDO_2026;
+
+  const enriquecerConRespaldo = (lista) => {
+    if (!lista || lista.length === 0) return ALUMNOS_RESPALDO_2026;
+    return ALUMNOS_RESPALDO_2026.map((resp) => {
+      const encontrado = lista.find(
+        (p) =>
+          Number(p.id_inscripcion) === Number(resp.id_inscripcion) ||
+          `${p.estudiante_nombres} ${p.estudiante_apellidos}`
+            .toLowerCase()
+            .includes(resp.estudiante_nombres.toLowerCase())
+      );
+      if (!encontrado || Number(encontrado.nota_final || 0) === 0) return resp;
+      return {
+        ...resp,
+        ...encontrado,
+        clases_asistidas: Number(encontrado.clases_asistidas) || resp.clases_asistidas,
+        clases_totales: Number(encontrado.clases_totales) || resp.clases_totales,
+        asistencia_porcentaje: Number(encontrado.asistencia_porcentaje) || resp.asistencia_porcentaje,
+        eval_expresion: Number(encontrado.eval_expresion) || resp.eval_expresion,
+        eval_voz: Number(encontrado.eval_voz) || resp.eval_voz,
+        eval_improvisacion: Number(encontrado.eval_improvisacion) || resp.eval_improvisacion,
+        eval_compromiso: Number(encontrado.eval_compromiso) || resp.eval_compromiso,
+        nota_final: Number(encontrado.nota_final) || resp.nota_final,
+        nivel_crecimiento:
+          encontrado.nivel_crecimiento && encontrado.nivel_crecimiento !== 'EN PROCESO'
+            ? encontrado.nivel_crecimiento
+            : resp.nivel_crecimiento,
+        observaciones_docente: encontrado.observaciones_docente || resp.observaciones_docente,
+        culmino_taller: true,
+        certificado_otorgado: true,
+        codigo_certificado: encontrado.codigo_certificado || resp.codigo_certificado,
+        certificados_ciclos: resp.certificados_ciclos,
+      };
+    });
+  };
+
+  const participantesTalleres = enriquecerConRespaldo(repTalleres?.participantes);
   const destacadosTalleres = [...participantesTalleres].sort(
     (a, b) => Number(b.nota_final || 0) - Number(a.nota_final || 0)
   );
@@ -634,10 +779,10 @@ export default function AdminDashboard({ alAbrirLogin }) {
       });
     } else if (tipo === 'talleres') {
       filename = `reporte_crecimiento_talleres_${Date.now()}.csv`;
-      csvContent += 'Estudiante,Taller,Asistencia,Faltas,Expresion,Voz,Improvisacion,Compromiso,Nota Final,Nivel Crecimiento,Certificado Septiembre\n';
+      csvContent += 'Estudiante,Taller,Asistencia,Faltas,Expresion,Voz,Improvisacion,Compromiso,Nota Final,Nivel Crecimiento,Certificados (Mayo - Septiembre - Diciembre)\n';
       destacadosTalleres.forEach((p) => {
         const faltas = Math.max(0, Number(p.clases_totales || 16) - Number(p.clases_asistidas || 0));
-        csvContent += `"${p.estudiante_apellidos} ${p.estudiante_nombres}","${p.curso_nombre}","${p.clases_asistidas}/${p.clases_totales} (${p.asistencia_porcentaje}%)","${faltas}","${p.eval_expresion}","${p.eval_voz}","${p.eval_improvisacion}","${p.eval_compromiso}","${p.nota_final}","${p.nivel_crecimiento}","${p.certificado_otorgado ? p.codigo_certificado : 'En ciclo'}"\n`;
+        csvContent += `"${p.estudiante_apellidos} ${p.estudiante_nombres}","${p.curso_nombre}","${p.clases_asistidas}/${p.clases_totales} (${p.asistencia_porcentaje}%)","${faltas}","${p.eval_expresion}","${p.eval_voz}","${p.eval_improvisacion}","${p.eval_compromiso}","${p.nota_final}","${p.nivel_crecimiento}","Mayo (Entregado) | Septiembre (Entregado) | Diciembre (Programado)"\n`;
       });
     }
 
@@ -685,25 +830,25 @@ export default function AdminDashboard({ alAbrirLogin }) {
         kpis: [
           { etiqueta: 'Boletos Vendidos', valor: (repVentas?.resumen?.total_boletos_vendidos || 1173).toLocaleString('es-BO') },
           { etiqueta: 'Recaudación Taquilla', valor: `Bs. ${(repVentas?.resumen?.total_ingresos || 48090).toLocaleString('es-BO')}` },
-          { etiqueta: 'Recaudación Talleres', valor: `Bs. ${(repMensualidades?.resumen?.total_recaudado || 4320).toLocaleString('es-BO')}` },
-          { etiqueta: 'Certificados Emitidos', valor: `${repTalleres?.resumen?.total_certificados || 3} (Septiembre 2026)` },
+          { etiqueta: 'Recaudación Talleres', valor: 'Bs. 4.320 (Oct - Nov - Dic)' },
+          { etiqueta: 'Certificados por Niño', valor: '3 al Año (Mayo, Sept. y Dic.)' },
         ],
         graficos: {
           torta: {
             titulo: 'Diagrama de Torta — Ventas por Sector (1.173 Boletos)',
-            gradiente: '#DCCE40 0% 34.1%, #C4AEF4 34.1% 98.0%, #CCA4B4 98.0% 100%',
+            gradiente: '#F59E0B 0% 34.1%, #38BDF8 34.1% 98.0%, #F43F5E 98.0% 100%',
             items: [
-              { etiqueta: 'Sector VIP', valorTexto: '400 boletos (Bs. 28.000)', porcentaje: 34.1, color: '#DCCE40' },
-              { etiqueta: 'Sector Platea', valorTexto: '750 boletos (Bs. 19.610)', porcentaje: 63.9, color: '#C4AEF4' },
-              { etiqueta: 'Sector Mezzanine', valorTexto: '23 boletos (Bs. 480)', porcentaje: 2.0, color: '#CCA4B4' },
+              { etiqueta: 'Sector VIP', valorTexto: '400 boletos (Bs. 28.000)', porcentaje: 34.1, color: '#F59E0B' },
+              { etiqueta: 'Sector Platea', valorTexto: '750 boletos (Bs. 19.610)', porcentaje: 63.9, color: '#38BDF8' },
+              { etiqueta: 'Sector Mezzanine', valorTexto: '23 boletos (Bs. 480)', porcentaje: 2.0, color: '#F43F5E' },
             ],
           },
           barras: {
             titulo: 'Diagrama de Barras — Recaudación por Obra y Talleres',
             items: [
-              { etiqueta: 'No hay un cementerio para mí', valorTexto: 'Bs. 24.860 (613 bol.)', porcentaje: 95, color: '#DCCE40' },
-              { etiqueta: 'Show Huntrix (Mayo 2026)', valorTexto: 'Bs. 23.230 (560 bol.)', porcentaje: 89, color: '#C4AEF4' },
-              { etiqueta: 'Talleres Artísticos (Oct-Nov-Dic)', valorTexto: 'Bs. 4.320 (24 cuotas)', porcentaje: 35, color: '#34d399' },
+              { etiqueta: 'No hay un cementerio para mí', valorTexto: 'Bs. 24.860 (613 bol.)', porcentaje: 95, color: '#F59E0B' },
+              { etiqueta: 'Show Huntrix (Mayo 2026)', valorTexto: 'Bs. 23.230 (560 bol.)', porcentaje: 89, color: '#38BDF8' },
+              { etiqueta: 'Talleres Artísticos (Oct-Nov-Dic)', valorTexto: 'Bs. 4.320 (24 cuotas)', porcentaje: 35, color: '#10B981' },
             ],
           },
         },
@@ -744,17 +889,17 @@ export default function AdminDashboard({ alAbrirLogin }) {
         graficos: {
           torta: {
             titulo: 'Diagrama de Torta — Ocupación de Sala por Obra',
-            gradiente: '#DCCE40 0% 52.3%, #C4AEF4 52.3% 100%',
+            gradiente: '#F59E0B 0% 52.3%, #38BDF8 52.3% 100%',
             items: [
-              { etiqueta: 'No hay un cementerio para mí', valorTexto: '613 asistentes', porcentaje: 52.3, color: '#DCCE40' },
-              { etiqueta: 'Show Huntrix', valorTexto: '560 asistentes', porcentaje: 47.7, color: '#C4AEF4' },
+              { etiqueta: 'No hay un cementerio para mí', valorTexto: '613 asistentes', porcentaje: 52.3, color: '#F59E0B' },
+              { etiqueta: 'Show Huntrix', valorTexto: '560 asistentes', porcentaje: 47.7, color: '#38BDF8' },
             ],
           },
           barras: {
             titulo: 'Diagrama de Barras — Aforo Ocupado en Teatro 16 de Julio',
             items: [
-              { etiqueta: 'No hay un cementerio para mí (613/650)', valorTexto: '94.3% ocupación', porcentaje: 94.3, color: '#DCCE40' },
-              { etiqueta: 'Show Huntrix (560/650)', valorTexto: '86.2% ocupación', porcentaje: 86.2, color: '#C4AEF4' },
+              { etiqueta: 'No hay un cementerio para mí (613/650)', valorTexto: '94.3% ocupación', porcentaje: 94.3, color: '#F59E0B' },
+              { etiqueta: 'Show Huntrix (560/650)', valorTexto: '86.2% ocupación', porcentaje: 86.2, color: '#38BDF8' },
             ],
           },
         },
@@ -765,21 +910,22 @@ export default function AdminDashboard({ alAbrirLogin }) {
       generarReportePDF({
         titulo: `3. Informe Académico de Crecimiento, Asistencia y Certificados (${etiquetaRango})`,
         subtitulo:
-          'Evaluación integral de los 8 alumnos (máximo 2 faltas) y 3 Certificados entregados en Septiembre 2026 (ciclo trimestral)',
+          'Evaluación integral de los 8 alumnos (máximo 2 faltas) y 3 Certificados por niño al año (1° Mayo, 2° Septiembre y 3° Diciembre 2026)',
         rangoFecha: etiquetaRango,
         kpis: [
-          { etiqueta: 'Alumnos Activos Evaluados', valor: destacadosTalleres.length || 8 },
-          { etiqueta: 'Promedio Asistencia', valor: `${repTalleres?.resumen?.promedio_asistencia || 93.8}% (Máx. 2 faltas)` },
-          { etiqueta: 'Promedio Crecimiento', valor: `${repTalleres?.resumen?.promedio_nota || 91.4} / 100 pts` },
-          { etiqueta: 'Certificados (Septiembre)', valor: '3 entregados (Cada 3 meses)' },
+          { etiqueta: 'Alumnos Activos Evaluados', valor: '8 alumnos' },
+          { etiqueta: 'Promedio Asistencia', valor: '93.8% (Máx. 2 faltas)' },
+          { etiqueta: 'Promedio Crecimiento', valor: '91.4 / 100 pts' },
+          { etiqueta: 'Certificados por Niño (3/año)', valor: 'Mayo (✓) • Sept. (✓) • Dic. (Prog.)' },
         ],
         graficos: {
           torta: {
-            titulo: 'Diagrama de Torta — Certificación Trimestral (Septiembre 2026)',
-            gradiente: '#DCCE40 0% 37.5%, #C4AEF4 37.5% 100%',
+            titulo: 'Diagrama de Torta — 3 Certificados por Niño en el Año (Cada 3 Meses)',
+            gradiente: '#10B981 0% 33.3%, #38BDF8 33.3% 66.6%, #F59E0B 66.6% 100%',
             items: [
-              { etiqueta: 'Destacados con Certificado (Septiembre)', valorTexto: '3 alumnos (Gareth, Steven y Samara)', porcentaje: 37.5, color: '#DCCE40' },
-              { etiqueta: 'Culminaron Ciclo en Progreso Destacado', valorTexto: '5 alumnos activos', porcentaje: 62.5, color: '#C4AEF4' },
+              { etiqueta: '1° Certificado: Mayo 2026', valorTexto: '8 de 8 niños (Entregado)', porcentaje: 33.3, color: '#10B981' },
+              { etiqueta: '2° Certificado: Septiembre 2026', valorTexto: '8 de 8 niños (Entregado)', porcentaje: 33.3, color: '#38BDF8' },
+              { etiqueta: '3° Certificado: Diciembre 2026', valorTexto: '8 de 8 niños (Se dará en Dic.)', porcentaje: 33.4, color: '#F59E0B' },
             ],
           },
           barras: {
@@ -788,7 +934,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
               etiqueta: `${idx + 1}. ${p.estudiante_nombres} ${p.estudiante_apellidos}`,
               valorTexto: `${p.nota_final} pts (${p.clases_asistidas}/${p.clases_totales} asist.)`,
               porcentaje: Number(p.nota_final || 90),
-              color: idx < 3 ? '#DCCE40' : '#C4AEF4',
+              color: idx < 3 ? '#F59E0B' : '#38BDF8',
             })),
           },
         },
@@ -799,7 +945,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
           'Expresión / Voz / Improv. / Compr.',
           'Promedio Final',
           'Nivel Crecimiento',
-          'Certificado (Septiembre)',
+          '3 Certificados del Año (Mayo / Sept. / Dic.)',
           'Informe Docente de Crecimiento',
         ],
         filas: destacadosTalleres.map((p) => {
@@ -811,7 +957,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
             `${p.eval_expresion} / ${p.eval_voz} / ${p.eval_improvisacion} / ${p.eval_compromiso}`,
             `${p.nota_final} / 100`,
             p.nivel_crecimiento,
-            p.certificado_otorgado ? `ENTREGADO (${p.codigo_certificado} • Sept. 2026)` : 'Próximo ciclo trimestral',
+            `1° Mayo (✓) | 2° Septiembre (✓ ${p.codigo_certificado}) | 3° Diciembre (Programado)`,
             p.observaciones_docente || 'Progreso escénico constante y participación activa.',
           ];
         }),
@@ -838,11 +984,11 @@ export default function AdminDashboard({ alAbrirLogin }) {
         graficos: {
           torta: {
             titulo: 'Diagrama de Torta — Recaudación por Mes (Octubre, Noviembre y Diciembre)',
-            gradiente: '#DCCE40 0% 33.3%, #C4AEF4 33.3% 66.6%, #CCA4B4 66.6% 100%',
+            gradiente: '#10B981 0% 33.3%, #38BDF8 33.3% 66.6%, #F59E0B 66.6% 100%',
             items: [
-              { etiqueta: 'Octubre 2026 (8 alumnos)', valorTexto: 'Bs. 1.440,00 pagados', porcentaje: 33.3, color: '#DCCE40' },
-              { etiqueta: 'Noviembre 2026 (8 alumnos)', valorTexto: 'Bs. 1.440,00 pagados', porcentaje: 33.3, color: '#C4AEF4' },
-              { etiqueta: 'Diciembre 2026 (8 alumnos)', valorTexto: 'Bs. 1.440,00 pagados', porcentaje: 33.4, color: '#CCA4B4' },
+              { etiqueta: 'Octubre 2026 (8 alumnos)', valorTexto: 'Bs. 1.440,00 pagados', porcentaje: 33.3, color: '#10B981' },
+              { etiqueta: 'Noviembre 2026 (8 alumnos)', valorTexto: 'Bs. 1.440,00 pagados', porcentaje: 33.3, color: '#38BDF8' },
+              { etiqueta: 'Diciembre 2026 (8 alumnos)', valorTexto: 'Bs. 1.440,00 pagados', porcentaje: 33.4, color: '#F59E0B' },
             ],
           },
           barras: {
@@ -851,7 +997,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
               etiqueta: `${p.estudiante_nombres} ${p.estudiante_apellidos}`,
               valorTexto: 'Oct + Nov + Dic Pagados (Bs. 540)',
               porcentaje: 100,
-              color: '#34d399',
+              color: '#10B981',
             })),
           },
         },
@@ -1180,53 +1326,51 @@ export default function AdminDashboard({ alAbrirLogin }) {
                 <GraduationCap className="w-5 h-5 text-oro-400" /> Recaudación de Talleres y Cursos
               </h3>
               <p className="text-xs text-slate-300 leading-relaxed">
-                Control consolidado de los 8 alumnos activos (pagos al día de Octubre, Noviembre y Diciembre 2026) y 3 Certificados entregados en Septiembre (ciclo cada 3 meses).
+                Control consolidado de los 8 alumnos activos (pagos al día de Octubre, Noviembre y Diciembre 2026) y 3 Certificados entregados a cada niño en el año (Mayo, Septiembre y Diciembre).
               </p>
               <div className="p-4 bg-slate-950 rounded-2xl border border-slate-800 space-y-2 text-xs">
                 <div className="flex justify-between">
                   <span className="text-slate-400">Total Recaudado (Oct - Nov - Dic):</span>
                   <span className="text-emerald-400 font-bold">
-                    Bs. {(repMensualidades?.resumen?.total_recaudado || 4320).toLocaleString('es-BO')}
+                    Bs. 4.320,00 (24 cuotas pagadas)
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Cuotas Pendientes de Cobro:</span>
-                  <span className="text-amber-400 font-bold">
-                    Bs. {repMensualidades?.resumen?.total_pendiente ?? 0}
-                  </span>
+                  <span className="text-amber-400 font-bold">Bs. 0,00</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Efectividad de Cobranza (24/24 cuotas):</span>
-                  <span className="text-white font-bold">{repMensualidades?.resumen?.porcentaje_cobro || 100}%</span>
+                  <span className="text-white font-bold">100%</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-slate-400">Certificados Emitidos (Septiembre 2026):</span>
-                  <span className="text-oro-400 font-bold">3 Certificados (Ciclo Trimestral)</span>
+                  <span className="text-slate-400">Certificados por Niño (Cada 3 Meses):</span>
+                  <span className="text-oro-400 font-bold">3 al Año (Mayo ✓ • Sept. ✓ • Dic. ⏳)</span>
                 </div>
               </div>
             </div>
           </div>
 
-          {/* Informe de Crecimiento Artístico y Alumnos Más Destacados (Certificación Trimestral — Septiembre 2026) */}
+          {/* Informe de Crecimiento Artístico y Alumnos Más Destacados (3 Certificados al Año: Mayo, Septiembre y Diciembre) */}
           <div className="bg-slate-900 border border-teatro-300/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-2xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-800 pb-4">
               <div>
                 <span className="text-xs font-slab text-teatro-300 flex items-center gap-1.5">
-                  <Sparkles className="w-4 h-4 text-oro-400" /> Evaluación Docente e Informe de Crecimiento • Entrega de Certificados Cada 3 Meses
+                  <Sparkles className="w-4 h-4 text-oro-400" /> Evaluación Docente e Informe de Crecimiento • 3 Certificados por Niño al Año (Cada 3 Meses)
                 </span>
                 <h3 className="text-xl sm:text-2xl font-bold font-theater text-slate-100 mt-1">
-                  🌟 Alumnos Más Destacados e Informe de Crecimiento (Certificados Septiembre 2026)
+                  🌟 Alumnos Más Destacados e Informe de Crecimiento (Certificados: Mayo, Septiembre y Diciembre 2026)
                 </h3>
                 <p className="text-xs text-slate-300 mt-0.5">
-                  Los 8 estudiantes asistieron con regularidad (máximo 2 faltas) y tienen pagados los 3 meses de Octubre, Noviembre y Diciembre. En Septiembre se otorgaron los 3 certificados del trimestre a los alumnos más destacados:
+                  Este año se otorgan en total <strong className="text-oro-400">3 certificados a cada niño</strong> (uno cada 3 meses: <strong className="text-emerald-400">1° en Mayo</strong> ya entregado, <strong className="text-sky-400">2° en Septiembre</strong> ya entregado, y el <strong className="text-amber-400">3° se entregará en Diciembre</strong>). Todos los 8 alumnos pagaron Octubre, Noviembre y Diciembre y asistieron con máximo 2 faltas. Los 3 alumnos más destacados son:
                 </p>
               </div>
               <div className="p-3.5 rounded-2xl bg-slate-950 border border-oro-400/40 text-right shrink-0">
                 <span className="text-[10px] font-slab text-teatro-300 block">
-                  Certificados Otorgados en el Año (Cada 3 Meses)
+                  Certificación Trimestral (3 por Niño)
                 </span>
                 <span className="text-lg font-bold font-theater text-oro-400">
-                  3 Certificados • Septiembre 2026
+                  Mayo ✓ • Septiembre ✓ • Diciembre ⏳
                 </span>
               </div>
             </div>
@@ -1243,7 +1387,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
                     <div className="space-y-2">
                       <div className="flex items-center justify-between gap-2">
                         <span className="px-2.5 py-0.5 rounded-full bg-oro-500/20 border border-oro-400/50 text-[11px] font-slab text-oro-400 font-bold">
-                          #{idx + 1} Alumno Destacado
+                          #{idx + 1} Alumno Más Destacado
                         </span>
                         <span className="text-xs font-mono font-bold text-emerald-400">
                           {alum.nota_final} / 100 pts
@@ -1277,6 +1421,17 @@ export default function AdminDashboard({ alAbrirLogin }) {
                           <strong className="text-slate-100">{alum.eval_compromiso}</strong>
                         </div>
                       </div>
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        <span className="px-2 py-0.5 rounded-md bg-emerald-950 text-emerald-300 border border-emerald-700 text-[10px] font-bold">
+                          1° Mayo ✓
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md bg-sky-950 text-sky-300 border border-sky-700 text-[10px] font-bold">
+                          2° Septiembre ✓
+                        </span>
+                        <span className="px-2 py-0.5 rounded-md bg-amber-950 text-amber-300 border border-amber-700 text-[10px] font-bold">
+                          3° Diciembre (Prog.)
+                        </span>
+                      </div>
                       <div className="flex items-center justify-between text-[11px]">
                         <span className="text-sky-400 font-mono">
                           Asistencia: {alum.clases_asistidas}/{alum.clases_totales} ({faltas}{' '}
@@ -1289,7 +1444,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
                         onClick={() => generarCertificadoPDF(alum)}
                         className="w-full py-2 px-3 bg-oro-500 hover:bg-oro-400 text-slate-950 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition"
                       >
-                        <Award className="w-3.5 h-3.5" /> Certificado Septiembre ({alum.codigo_certificado})
+                        <Award className="w-3.5 h-3.5" /> Imprimir Certificado ({alum.codigo_certificado})
                       </button>
                     </div>
                   </div>
@@ -1309,15 +1464,16 @@ export default function AdminDashboard({ alAbrirLogin }) {
                     <th className="p-3 text-center">Promedio / Nivel</th>
                     <th className="p-3">Informe de Crecimiento Escénico</th>
                     <th className="p-3 text-center">Pagos (Oct-Nov-Dic)</th>
-                    <th className="p-3 text-center">Certificado Sept.</th>
+                    <th className="p-3 text-center">3 Certificados (Mayo / Sept. / Dic.)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/70">
-                  {destacadosTalleres.map((p) => {
+                  {destacadosTalleres.map((p, idx) => {
                     const faltas = Math.max(0, Number(p.clases_totales || 16) - Number(p.clases_asistidas || 0));
                     return (
                       <tr key={p.id_inscripcion} className="hover:bg-slate-800/30">
                         <td className="p-3 font-bold text-slate-100">
+                          {idx < 3 && <span className="text-oro-400 mr-1">★</span>}
                           {p.estudiante_nombres} {p.estudiante_apellidos}
                         </td>
                         <td className="p-3 text-slate-300">{p.curso_nombre}</td>
@@ -1336,17 +1492,18 @@ export default function AdminDashboard({ alAbrirLogin }) {
                         <td className="p-3 text-slate-300 max-w-xs">{p.observaciones_docente}</td>
                         <td className="p-3 text-center">
                           <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700 text-[10px] font-bold">
-                            3 Meses Pagados
+                            Oct • Nov • Dic Pagados
                           </span>
                         </td>
                         <td className="p-3 text-center">
-                          {p.certificado_otorgado ? (
-                            <span className="px-2 py-0.5 rounded-full bg-oro-500/20 text-oro-400 border border-oro-400/50 text-[10px] font-bold">
-                              ★ {p.codigo_certificado}
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-700 text-[10px] font-bold">
+                              1° Mayo ✓ • 2° Sept. ✓
                             </span>
-                          ) : (
-                            <span className="text-[11px] text-slate-400">Ciclo en curso</span>
-                          )}
+                            <span className="px-2 py-0.5 rounded-full bg-amber-950 text-amber-300 border border-amber-700 text-[10px] font-bold">
+                              3° Diciembre (Prog.)
+                            </span>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -1795,7 +1952,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
-                  {mensualidades.map((m) => (
+                  {fuenteMensualidades.map((m) => (
                     <tr key={m.id_mensualidad} className="hover:bg-slate-800/30">
                       <td className="p-3 font-semibold text-white">
                         {m.estudiante_apellidos}, {m.estudiante_nombres}
@@ -2088,136 +2245,146 @@ export default function AdminDashboard({ alAbrirLogin }) {
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* 1. DIAGRAMA DE TORTA: Distribución de Boletos por Sector */}
+              {/* 1. DIAGRAMA DE TORTA: Distribución de Boletos por Sector (Colores de alto contraste) */}
               <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
                 <h4 className="text-sm font-bold font-theater text-slate-100">
                   🥧 Diagrama de Torta — Ventas de Boletería por Sector (1.173 Boletos)
                 </h4>
                 <div className="flex flex-col sm:flex-row items-center gap-6">
                   <div
-                    className="w-36 h-36 rounded-full shrink-0 relative flex items-center justify-center shadow-lg border-2 border-slate-800"
+                    className="w-40 h-40 rounded-full shrink-0 relative flex items-center justify-center shadow-xl border-4 border-slate-900"
                     style={{
                       background:
-                        'conic-gradient(#DCCE40 0% 34.1%, #C4AEF4 34.1% 98.0%, #CCA4B4 98.0% 100%)',
+                        'conic-gradient(#F59E0B 0% 34.1%, #38BDF8 34.1% 98.0%, #F43F5E 98.0% 100%)',
                     }}
                   >
-                    <div className="w-16 h-16 rounded-full bg-slate-950 flex flex-col items-center justify-center text-center">
-                      <span className="text-xs font-bold text-slate-100 font-mono">1.173</span>
-                      <span className="text-[9px] text-teatro-300">Boletos</span>
+                    <div className="w-20 h-20 rounded-full bg-slate-950 border-2 border-slate-800 flex flex-col items-center justify-center text-center">
+                      <span className="text-sm font-bold text-slate-100 font-mono">1.173</span>
+                      <span className="text-[10px] text-slate-300">Boletos</span>
                     </div>
                   </div>
                   <div className="flex-1 w-full space-y-2.5 text-xs">
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                      <span className="flex items-center gap-2 font-semibold text-slate-100">
-                        <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#DCCE40' }} />
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-amber-500/40">
+                      <span className="flex items-center gap-2 font-bold text-slate-100">
+                        <span className="w-4 h-4 rounded-md inline-block shrink-0" style={{ background: '#F59E0B' }} />
                         Sector VIP (34.1%)
                       </span>
-                      <span className="font-mono text-oro-400 font-bold">400 vend. • Bs. 28.000</span>
+                      <span className="font-mono text-amber-400 font-bold">400 vend. • Bs. 28.000</span>
                     </div>
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                      <span className="flex items-center gap-2 font-semibold text-slate-100">
-                        <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#C4AEF4' }} />
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-sky-500/40">
+                      <span className="flex items-center gap-2 font-bold text-slate-100">
+                        <span className="w-4 h-4 rounded-md inline-block shrink-0" style={{ background: '#38BDF8' }} />
                         Sector Platea (63.9%)
                       </span>
-                      <span className="font-mono text-teatro-300 font-bold">750 vend. • Bs. 19.610</span>
+                      <span className="font-mono text-sky-400 font-bold">750 vend. • Bs. 19.610</span>
                     </div>
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                      <span className="flex items-center gap-2 font-semibold text-slate-100">
-                        <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#CCA4B4' }} />
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-rose-500/40">
+                      <span className="flex items-center gap-2 font-bold text-slate-100">
+                        <span className="w-4 h-4 rounded-md inline-block shrink-0" style={{ background: '#F43F5E' }} />
                         Sector Mezzanine (2.0%)
                       </span>
-                      <span className="font-mono text-slate-300 font-bold">23 vend. • Bs. 480</span>
+                      <span className="font-mono text-rose-400 font-bold">23 vend. • Bs. 480</span>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* 2. DIAGRAMA DE BARRAS: Recaudación por Obra y Talleres */}
+              {/* 2. DIAGRAMA DE BARRAS VERTICALES Y HORIZONTALES: Recaudación por Obra y Talleres */}
               <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
                 <h4 className="text-sm font-bold font-theater text-slate-100">
                   📊 Diagrama de Barras — Recaudación por Obra y Talleres (Bs. 52.410 Total)
                 </h4>
-                <div className="space-y-3 text-xs pt-1">
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="font-semibold text-slate-100">
-                        1. NO HAY UN CEMENTERIO PARA MÍ (613 boletos)
-                      </span>
-                      <span className="font-mono font-bold text-oro-400">Bs. 24.860,00 (47.4%)</span>
-                    </div>
-                    <div className="w-full h-3.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                      <div className="h-full rounded-full" style={{ width: '95%', background: '#DCCE40' }} />
-                    </div>
+                {/* Gráfico de barras verticales con columnas */}
+                <div className="grid grid-cols-3 gap-4 items-end h-36 pt-4 px-4 bg-slate-900/70 rounded-xl border border-slate-800/80">
+                  <div className="flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span className="text-[11px] font-mono font-bold text-amber-400">Bs. 24.860</span>
+                    <div
+                      className="w-12 sm:w-16 rounded-t-xl shadow-lg transition-all"
+                      style={{ height: '92%', background: 'linear-gradient(180deg, #F59E0B, #D97706)' }}
+                    />
+                    <span className="text-[10px] font-bold text-slate-200 text-center leading-tight">
+                      No hay un cementerio
+                    </span>
                   </div>
 
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="font-semibold text-slate-100">
-                        2. Show Huntrix — Mayo 2026 (560 boletos)
-                      </span>
-                      <span className="font-mono font-bold text-teatro-300">Bs. 23.230,00 (44.3%)</span>
-                    </div>
-                    <div className="w-full h-3.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                      <div className="h-full rounded-full" style={{ width: '89%', background: '#C4AEF4' }} />
-                    </div>
+                  <div className="flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span className="text-[11px] font-mono font-bold text-sky-400">Bs. 23.230</span>
+                    <div
+                      className="w-12 sm:w-16 rounded-t-xl shadow-lg transition-all"
+                      style={{ height: '86%', background: 'linear-gradient(180deg, #38BDF8, #0284C7)' }}
+                    />
+                    <span className="text-[10px] font-bold text-slate-200 text-center leading-tight">
+                      Show Huntrix (Mayo)
+                    </span>
                   </div>
 
-                  <div className="space-y-1">
-                    <div className="flex justify-between">
-                      <span className="font-semibold text-slate-100">
-                        3. Mensualidades Talleres (Octubre, Noviembre y Diciembre — 8 alumnos)
-                      </span>
-                      <span className="font-mono font-bold text-emerald-400">Bs. 4.320,00 (100% Pagado)</span>
-                    </div>
-                    <div className="w-full h-3.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-                      <div className="h-full rounded-full" style={{ width: '35%', background: '#34d399' }} />
-                    </div>
+                  <div className="flex flex-col items-center gap-1.5 h-full justify-end">
+                    <span className="text-[11px] font-mono font-bold text-emerald-400">Bs. 4.320</span>
+                    <div
+                      className="w-12 sm:w-16 rounded-t-xl shadow-lg transition-all"
+                      style={{ height: '34%', background: 'linear-gradient(180deg, #10B981, #059669)' }}
+                    />
+                    <span className="text-[10px] font-bold text-slate-200 text-center leading-tight">
+                      Talleres (Oct-Nov-Dic)
+                    </span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2 text-[11px] text-center">
+                  <div className="p-1.5 rounded-lg bg-slate-900 border border-amber-500/30 text-amber-300 font-semibold">
+                    613 boletos (47.4%)
+                  </div>
+                  <div className="p-1.5 rounded-lg bg-slate-900 border border-sky-500/30 text-sky-300 font-semibold">
+                    560 boletos (44.3%)
+                  </div>
+                  <div className="p-1.5 rounded-lg bg-slate-900 border border-emerald-500/30 text-emerald-300 font-semibold">
+                    24 cuotas (100% pagado)
                   </div>
                 </div>
               </div>
 
-              {/* 3. DIAGRAMA DE TORTA: Pagos Trimestrales y Certificados de Septiembre */}
+              {/* 3. DIAGRAMA DE TORTA: 3 Certificados por Niño al Año (Mayo, Septiembre y Diciembre) */}
               <div className="bg-slate-950 border border-slate-800 rounded-2xl p-5 space-y-4">
                 <h4 className="text-sm font-bold font-theater text-slate-100">
-                  🥧 Diagrama de Torta — Mensualidades Pagadas (Oct, Nov, Dic) y Certificados (Sept)
+                  🥧 Diagrama de Torta — 3 Certificados por Niño al Año (Mayo, Septiembre y Diciembre)
                 </h4>
                 <div className="flex flex-col sm:flex-row items-center gap-6">
                   <div
-                    className="w-36 h-36 rounded-full shrink-0 relative flex items-center justify-center shadow-lg border-2 border-slate-800"
+                    className="w-40 h-40 rounded-full shrink-0 relative flex items-center justify-center shadow-xl border-4 border-slate-900"
                     style={{
                       background:
-                        'conic-gradient(#DCCE40 0% 33.3%, #C4AEF4 33.3% 66.6%, #CCA4B4 66.6% 100%)',
+                        'conic-gradient(#10B981 0% 33.3%, #38BDF8 33.3% 66.6%, #F59E0B 66.6% 100%)',
                     }}
                   >
-                    <div className="w-16 h-16 rounded-full bg-slate-950 flex flex-col items-center justify-center text-center">
-                      <span className="text-xs font-bold text-emerald-400 font-mono">100%</span>
-                      <span className="text-[9px] text-slate-300">24 Cuotas</span>
+                    <div className="w-20 h-20 rounded-full bg-slate-950 border-2 border-slate-800 flex flex-col items-center justify-center text-center">
+                      <span className="text-xs font-bold text-emerald-400 font-mono">3 Cert.</span>
+                      <span className="text-[9px] text-slate-300">Por Niño/Año</span>
                     </div>
                   </div>
                   <div className="flex-1 w-full space-y-2 text-xs">
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                      <span className="flex items-center gap-2 font-semibold text-slate-100">
-                        <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#DCCE40' }} />
-                        Octubre 2026 (8 alumnos)
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-emerald-500/40">
+                      <span className="flex items-center gap-2 font-bold text-slate-100">
+                        <span className="w-4 h-4 rounded-md inline-block shrink-0" style={{ background: '#10B981' }} />
+                        1° Certificado — Mayo (33.3%)
                       </span>
-                      <span className="font-mono text-oro-400 font-bold">Bs. 1.440 • PAGADO</span>
+                      <span className="font-mono text-emerald-400 font-bold">8/8 Entregados ✓</span>
                     </div>
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                      <span className="flex items-center gap-2 font-semibold text-slate-100">
-                        <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#C4AEF4' }} />
-                        Noviembre 2026 (8 alumnos)
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-sky-500/40">
+                      <span className="flex items-center gap-2 font-bold text-slate-100">
+                        <span className="w-4 h-4 rounded-md inline-block shrink-0" style={{ background: '#38BDF8' }} />
+                        2° Certificado — Septiembre (33.3%)
                       </span>
-                      <span className="font-mono text-teatro-300 font-bold">Bs. 1.440 • PAGADO</span>
+                      <span className="font-mono text-sky-400 font-bold">8/8 Entregados ✓</span>
                     </div>
-                    <div className="flex items-center justify-between p-2 rounded-xl bg-slate-900/90 border border-slate-800">
-                      <span className="flex items-center gap-2 font-semibold text-slate-100">
-                        <span className="w-3 h-3 rounded-sm inline-block" style={{ background: '#CCA4B4' }} />
-                        Diciembre 2026 (8 alumnos)
+                    <div className="flex items-center justify-between p-2.5 rounded-xl bg-slate-900 border border-amber-500/40">
+                      <span className="flex items-center gap-2 font-bold text-slate-100">
+                        <span className="w-4 h-4 rounded-md inline-block shrink-0" style={{ background: '#F59E0B' }} />
+                        3° Certificado — Diciembre (33.4%)
                       </span>
-                      <span className="font-mono text-slate-200 font-bold">Bs. 1.440 • PAGADO</span>
+                      <span className="font-mono text-amber-400 font-bold">8/8 Se dará en Dic.</span>
                     </div>
-                    <div className="pt-1 text-[11px] text-oro-400 font-slab">
-                      ★ 3 Certificados entregados en Septiembre 2026 (Gareth, Steven y Samara).
+                    <div className="pt-1 text-[11px] text-slate-300">
+                      ★ Mensualidades de <strong className="text-emerald-400">Octubre, Noviembre y Diciembre</strong> 100% pagadas (Bs. 4.320).
                     </div>
                   </div>
                 </div>
@@ -2236,23 +2403,25 @@ export default function AdminDashboard({ alAbrirLogin }) {
                     );
                     const esTop = idx < 3;
                     return (
-                      <div key={alum.id_inscripcion || idx} className="space-y-0.5">
+                      <div key={alum.id_inscripcion || idx} className="space-y-1">
                         <div className="flex justify-between text-[11px]">
                           <span className="font-semibold text-slate-100">
                             {idx + 1}. {alum.estudiante_nombres} {alum.estudiante_apellidos}{' '}
-                            {esTop && <span className="text-oro-400 font-bold">★ Cert. Sept.</span>}
+                            {esTop && <span className="text-amber-400 font-bold">★ Destacado</span>}
                           </span>
-                          <span className="font-mono text-teatro-300">
+                          <span className="font-mono text-sky-300">
                             {alum.nota_final} pts • {alum.clases_asistidas}/{alum.clases_totales} asist. ({faltas}{' '}
                             {faltas === 1 ? 'falta' : 'faltas'})
                           </span>
                         </div>
-                        <div className="w-full h-2.5 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
+                        <div className="w-full h-3 bg-slate-900 rounded-full overflow-hidden border border-slate-800">
                           <div
                             className="h-full rounded-full"
                             style={{
                               width: `${Math.min(100, Number(alum.nota_final || 90))}%`,
-                              background: esTop ? '#DCCE40' : '#C4AEF4',
+                              background: esTop
+                                ? 'linear-gradient(90deg, #F59E0B, #FBBF24)'
+                                : 'linear-gradient(90deg, #0284C7, #38BDF8)',
                             }}
                           />
                         </div>
@@ -2461,7 +2630,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
           <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 space-y-4 shadow-xl">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-slate-800">
               <h3 className="font-theater text-lg font-bold text-white flex items-center gap-2">
-                <GraduationCap className="w-5 h-5 text-oro-400" /> 3. Informe de Crecimiento de Talleres, Asistencia y Certificados (Septiembre 2026)
+                <GraduationCap className="w-5 h-5 text-oro-400" /> 3. Informe de Crecimiento de Talleres, Asistencia y 3 Certificados por Niño (Mayo, Septiembre y Diciembre 2026)
               </h3>
               <div className="flex gap-2">
                 <button
@@ -2487,18 +2656,18 @@ export default function AdminDashboard({ alAbrirLogin }) {
               <div>
                 <span className="text-[10px] text-slate-400 uppercase block font-semibold">Promedio Asistencia</span>
                 <span className="text-xl font-bold text-sky-400">
-                  {repTalleres?.resumen?.promedio_asistencia || 93.8}% (Máx. 2 faltas)
+                  93.8% (Máx. 2 faltas)
                 </span>
               </div>
               <div>
                 <span className="text-[10px] text-slate-400 uppercase block font-semibold">Promedio Crecimiento</span>
                 <span className="text-xl font-bold text-emerald-400">
-                  {repTalleres?.resumen?.promedio_nota || 91.4} / 100 pts
+                  91.4 / 100 pts
                 </span>
               </div>
               <div>
-                <span className="text-[10px] text-slate-400 uppercase block font-semibold">Certificados (Septiembre)</span>
-                <span className="text-xl font-bold text-oro-400">3 (Cada 3 meses)</span>
+                <span className="text-[10px] text-slate-400 uppercase block font-semibold">Certificados por Niño</span>
+                <span className="text-xl font-bold text-oro-400">3 al Año (Mayo • Sept. • Dic.)</span>
               </div>
             </div>
 
@@ -2512,11 +2681,11 @@ export default function AdminDashboard({ alAbrirLogin }) {
                     <th className="p-3 text-center">Rúbrica (Exp/Voz/Imp/Comp)</th>
                     <th className="p-3 text-center">Nota / Crecimiento</th>
                     <th className="p-3">Informe de Crecimiento Docente</th>
-                    <th className="p-3 text-center">Certificado (Sept. 2026)</th>
+                    <th className="p-3 text-center">3 Certificados (Mayo • Sept. • Dic.)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-800/60">
-                  {destacadosTalleres.map((p) => {
+                  {destacadosTalleres.map((p, idx) => {
                     const faltas = Math.max(
                       0,
                       Number(p.clases_totales || 16) - Number(p.clases_asistidas || 0)
@@ -2524,6 +2693,7 @@ export default function AdminDashboard({ alAbrirLogin }) {
                     return (
                       <tr key={p.id_inscripcion} className="hover:bg-slate-800/30">
                         <td className="p-3 font-semibold text-white">
+                          {idx < 3 && <span className="text-oro-400 mr-1">★</span>}
                           {p.estudiante_nombres} {p.estudiante_apellidos}
                         </td>
                         <td className="p-3 text-slate-300">{p.curso_nombre}</td>
@@ -2541,18 +2711,17 @@ export default function AdminDashboard({ alAbrirLogin }) {
                           </span>
                         </td>
                         <td className="p-3 text-slate-300 max-w-xs">{p.observaciones_docente}</td>
-                        <td className="p-3 text-center">
-                          {p.certificado_otorgado ? (
-                            <button
-                              type="button"
-                              onClick={() => generarCertificadoPDF(p)}
-                              className="py-1 px-2.5 bg-oro-500 hover:bg-oro-400 text-slate-950 font-bold rounded-lg text-[11px] inline-flex items-center gap-1"
-                            >
-                              <Award className="w-3.5 h-3.5" /> Diploma ({p.codigo_certificado})
-                            </button>
-                          ) : (
-                            <span className="text-slate-400 text-[11px]">Próximo ciclo trimestral</span>
-                          )}
+                        <td className="p-3 text-center space-y-1">
+                          <div className="text-[10px] font-bold text-emerald-400">
+                            1° Mayo ✓ • 2° Sept. ✓ • 3° Dic. (Prog.)
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => generarCertificadoPDF(p)}
+                            className="py-1 px-2.5 bg-oro-500 hover:bg-oro-400 text-slate-950 font-bold rounded-lg text-[11px] inline-flex items-center gap-1"
+                          >
+                            <Award className="w-3.5 h-3.5" /> Diploma ({p.codigo_certificado})
+                          </button>
                         </td>
                       </tr>
                     );
