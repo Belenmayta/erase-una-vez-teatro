@@ -46,10 +46,7 @@ export default function Home({ alCambiarPagina, alSeleccionarFuncion }) {
               </div>
 
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold font-theater text-slate-100 tracking-tight leading-tight">
-                Donde la imaginación y las emociones cobran{' '}
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-oro-400 via-teatro-300 to-malva-400">
-                  vida sobre el escenario
-                </span>
+                Donde la imaginación y las emociones cobran vida sobre el escenario
               </h1>
 
               <p className="text-base sm:text-lg text-slate-200/90 leading-relaxed max-w-2xl mx-auto lg:mx-0">

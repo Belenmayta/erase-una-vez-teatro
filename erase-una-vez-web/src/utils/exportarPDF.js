@@ -3,7 +3,9 @@
 export function generarReportePDF({
   titulo = 'Reporte Institucional',
   subtitulo = 'Sistema de Gestión Cultural y Académica',
+  rangoFecha = '',
   kpis = [],
+  graficos = null,
   columnas = [],
   filas = [],
 }) {
@@ -26,6 +28,55 @@ export function generarReportePDF({
             .join('')}
         </div>`
       : '';
+
+  const graficosHtml = graficos
+    ? `<div class="charts-grid">
+        ${
+          graficos.torta
+            ? `<div class="chart-card">
+                <div class="chart-title">📊 ${graficos.torta.titulo}</div>
+                <div class="pie-wrap">
+                  <div class="pie-circle" style="background: conic-gradient(${graficos.torta.gradiente});"></div>
+                  <div class="pie-legend">
+                    ${graficos.torta.items
+                      .map(
+                        (it) => `
+                      <div class="leg-item">
+                        <span class="leg-dot" style="background:${it.color};"></span>
+                        <span><strong>${it.etiqueta}:</strong> ${it.valorTexto} (${it.porcentaje}%)</span>
+                      </div>`
+                      )
+                      .join('')}
+                  </div>
+                </div>
+              </div>`
+            : ''
+        }
+        ${
+          graficos.barras
+            ? `<div class="chart-card">
+                <div class="chart-title">📈 ${graficos.barras.titulo}</div>
+                <div class="bars-wrap">
+                  ${graficos.barras.items
+                    .map(
+                      (b) => `
+                    <div class="bar-row">
+                      <div class="bar-head">
+                        <span><strong>${b.etiqueta}</strong></span>
+                        <span>${b.valorTexto} (${b.porcentaje}%)</span>
+                      </div>
+                      <div class="bar-track">
+                        <div class="bar-fill" style="width:${Math.max(4, b.porcentaje)}%; background:${b.color};"></div>
+                      </div>
+                    </div>`
+                    )
+                    .join('')}
+                </div>
+              </div>`
+            : ''
+        }
+      </div>`
+    : '';
 
   const theadHtml = columnas.map((c) => `<th>${c}</th>`).join('');
   const tbodyHtml =
@@ -110,6 +161,86 @@ export function generarReportePDF({
       color: #0f172a;
       margin-top: 3px;
     }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+    .chart-card {
+      border: 1px solid #cbd5e1;
+      border-radius: 10px;
+      padding: 12px 14px;
+      background: #f8fafc;
+    }
+    .chart-title {
+      font-size: 12px;
+      font-weight: 800;
+      color: #472F5B;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+    }
+    .pie-wrap {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .pie-circle {
+      width: 110px;
+      height: 110px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      border: 2px solid #fff;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .pie-legend {
+      font-size: 11px;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .leg-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .leg-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      display: inline-block;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .bars-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .bar-row {
+      font-size: 11px;
+    }
+    .bar-head {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 3px;
+    }
+    .bar-track {
+      height: 11px;
+      background: #e2e8f0;
+      border-radius: 99px;
+      overflow: hidden;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
+    .bar-fill {
+      height: 100%;
+      border-radius: 99px;
+      -webkit-print-color-adjust: exact;
+      print-color-adjust: exact;
+    }
     table {
       width: 100%;
       border-collapse: collapse;
@@ -155,6 +286,7 @@ export function generarReportePDF({
     </div>
     <div class="report-meta">
       <div><strong>Fecha de emisión:</strong> ${fechaEmision}</div>
+      ${rangoFecha ? `<div><strong>Período / Rango:</strong> ${rangoFecha}</div>` : ''}
       <div><strong>Documento:</strong> Oficial / Auditoría</div>
     </div>
   </div>
@@ -163,6 +295,7 @@ export function generarReportePDF({
   <p class="doc-sub">${subtitulo}</p>
 
   ${kpisHtml}
+  ${graficosHtml}
 
   <table>
     <thead>

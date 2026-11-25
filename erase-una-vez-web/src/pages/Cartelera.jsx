@@ -175,10 +175,10 @@ export default function Cartelera({ alSeleccionarFuncion }) {
           Repertorio y Cartelera Oficial
         </div>
         <h1 className="text-3xl sm:text-4xl font-bold font-theater text-white">
-          Obras en Cartelera y Archivo Histórico Teatral
+          Obras en Cartelera y Próximos Estrenos
         </h1>
         <p className="text-slate-300 text-sm">
-          Adquiere boletos para nuestras próximas funciones o explora el archivo histórico de puestas en escena de la compañía para estudio de alumnos y personal administrativo.
+          Adquiere boletos para nuestras próximas funciones o conoce las obras en preparación de la compañía.
         </p>
 
         {/* Selector Dinámico de Secciones */}
@@ -207,19 +207,6 @@ export default function Cartelera({ alSeleccionarFuncion }) {
           >
             <Film className="w-4 h-4 text-amber-400" />
             Repertorio Actual & Próximos Estrenos ({obrasProximas.length})
-          </button>
-
-          <button
-            type="button"
-            onClick={() => setFiltroVista('archivo')}
-            className={`px-4 py-2.5 rounded-xl text-xs font-bold transition flex items-center gap-2 border ${
-              filtroVista === 'archivo'
-                ? 'bg-indigo-700 text-white border-indigo-400 shadow-lg'
-                : 'bg-slate-900 text-slate-300 border-slate-800 hover:text-white'
-            }`}
-          >
-            <History className="w-4 h-4 text-indigo-300" />
-            Archivo de Obras Antiguas ({obrasAntiguas.length})
           </button>
         </div>
 

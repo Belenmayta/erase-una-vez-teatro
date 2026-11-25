@@ -65,13 +65,13 @@ export default function Navbar({ alAbrirLogin, paginaActual, alCambiarPagina }) 
             {/* Mis Boletos Digitales Ubicado Arriba en la Barra Principal */}
             <button
               onClick={() => (usuario ? irA('mis-boletos') : alAbrirLogin())}
-              className={`px-3.5 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-1.5 ${
+              className={`px-3 py-2 rounded-lg text-sm font-medium transition flex items-center gap-1.5 ${
                 paginaActual === 'mis-boletos'
-                  ? 'bg-oro-500 text-slate-950 shadow-lg shadow-oro-500/30'
-                  : 'bg-oro-500/15 text-oro-300 hover:bg-oro-500/25 border border-oro-500/40'
+                  ? 'bg-teatro-900/60 text-teatro-300 border border-teatro-700/50'
+                  : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
               }`}
             >
-              <Ticket className={`w-4 h-4 ${paginaActual === 'mis-boletos' ? 'text-slate-950' : 'text-oro-400'}`} />
+              <Ticket className="w-4 h-4 text-oro-400" />
               Mis Boletos Digitales
             </button>
 
@@ -201,7 +201,7 @@ export default function Navbar({ alAbrirLogin, paginaActual, alCambiarPagina }) 
           </button>
           <button
             onClick={() => (usuario ? irA('mis-boletos') : alAbrirLogin())}
-            className="w-full text-left py-2.5 px-3 rounded-lg bg-oro-500/15 border border-oro-500/40 text-oro-300 font-semibold hover:bg-oro-500/25 flex items-center gap-2"
+            className="w-full text-left py-2.5 px-3 rounded-lg text-slate-200 hover:bg-slate-800 flex items-center gap-2"
           >
             <Ticket className="w-4 h-4 text-oro-400" /> Mis Boletos Digitales
           </button>
